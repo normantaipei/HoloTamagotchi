@@ -19,6 +19,7 @@
 import time
 import config
 import i18n
+import dev
 from m5stack import lcd, btnA, btnB, btnC
 
 from metrics import Metrics
@@ -70,7 +71,9 @@ class Game:
         self.metrics = Metrics()
         i18n.set_lang(config.DEFAULT_LANG)
         self.assets = AssetManager(lcd, config.DEFAULT_CHARACTER)
-        self.imu = init_imu()     # 內建 IMU；None 代表不可用（搖一搖會靜默停用）
+        # 內建 IMU；None 代表不可用（搖一搖會靜默停用）。dev.json skip_imu=true 可強制跳過，
+        # 避免 IMU() 在 I²C 上 block 卡死整個開機（見 dev.SKIP_IMU 說明）。
+        self.imu = None if dev.SKIP_IMU else init_imu()
         self.ending_kind = None   # 結局種類，由 Ending Evaluator 設定
         self._dbg_sig = None      # DEV overlay 上次畫的內容簽章（用來避免每幀重畫）
 
@@ -151,13 +154,15 @@ def build_states(game):
 
 
 def main():
+    # 先載入 dev.json：此時頂層 import 已全部完成、mount 閒置，open() 不會死鎖
+    # （若在 import 進行中讀檔，mpremote mount 會巢狀死鎖、開機卡死黑屏，見 dev.init）。
+    dev.init()
     mute_speaker()
     game = Game()
     states = build_states(game)
 
     # DEV：dev.json 可強制起始狀態，跳過開場蛋動畫直接進指定狀態除錯。
     # 數值覆寫已在 Game()→Metrics() 建構時套用；未設定或非法值則照正常 init 流程。
-    import dev
     current = dev.start_state()
     if current not in states:
         current = config.STATE_INIT
@@ -168,18 +173,26 @@ def main():
     print("HoloTamagotchi started @", current)
 
     while True:
-        nxt = state.update()
-        transitioned = False
-        if nxt and nxt != current:
-            state.on_exit()
-            current = nxt
-            state = states[current]
-            state.on_enter()
-            transitioned = True
-            print("-> state", current)
-        # DEV 疊圖：只在數值變動或剛切換狀態時重畫（避免閃爍）；prod 完全不畫
-        if config.DEV:
-            game.draw_debug_overlay(current, force=transitioned)
+        try:
+            nxt = state.update()
+            transitioned = False
+            if nxt and nxt != current:
+                state.on_exit()
+                current = nxt
+                state = states[current]
+                state.on_enter()
+                transitioned = True
+                print("-> state", current)
+            # DEV 疊圖：只在數值變動或剛切換狀態時重畫（避免閃爍）；prod 完全不畫
+            if config.DEV:
+                game.draw_debug_overlay(current, force=transitioned)
+        except Exception as e:
+            # 印出完整 traceback 後把例外往上拋：mount run 下會回到 REPL，
+            # 既能看到錯誤、終端機也拿得回來（不會卡在內層死迴圈）。
+            import sys
+            print("!! loop crash in state", current, ":", repr(e))
+            sys.print_exception(e)
+            raise
         time.sleep_ms(config.FRAME_MS)
 
 
