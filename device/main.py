@@ -40,6 +40,24 @@ def mute_speaker():
         pass
 
 
+def init_imu():
+    """初始化 M5 Fire 內建 IMU（MPU6886，含加速度計 + 陀螺儀）。
+
+    不同 UIFlow1 韌體匯入路徑不一，逐一嘗試；取不到（如 mount 開發、無此硬體）
+    回 None，呼叫端需自行容錯（搖一搖功能靜默停用，不影響其它玩法）。
+    """
+    try:
+        from imu import IMU
+        return IMU()
+    except Exception:
+        pass
+    try:
+        from m5stack import imu
+        return imu.IMU()
+    except Exception:
+        return None
+
+
 class Game:
     """共用情境物件：硬體 + 子系統，傳給各 State 使用，避免到處 import。"""
 
@@ -51,8 +69,26 @@ class Game:
         self.metrics = Metrics()
         i18n.set_lang(config.DEFAULT_LANG)
         self.assets = AssetManager(lcd, config.DEFAULT_CHARACTER)
+        self.imu = init_imu()     # 內建 IMU；None 代表不可用（搖一搖會靜默停用）
         self.ending_kind = None   # 結局種類，由 Ending Evaluator 設定
         self._dbg_sig = None      # DEV overlay 上次畫的內容簽章（用來避免每幀重畫）
+
+    def imu_motion(self):
+        """回傳 (加速度大小 g, 角速度大小 °/s)；IMU 不可用或讀取失敗回 None。
+
+        搖一搖判定只關心「總動量」，故回傳兩者的向量大小、與方向無關。
+        靜止：加速度 ≈ 1.0、角速度 ≈ 3。
+        """
+        if self.imu is None:
+            return None
+        try:
+            ax, ay, az = self.imu.acceleration
+            gx, gy, gz = self.imu.gyro
+            amag = (ax * ax + ay * ay + az * az) ** 0.5
+            gmag = (gx * gx + gy * gy + gz * gz) ** 0.5
+            return (amag, gmag)
+        except Exception:
+            return None
 
     def is_night(self):
         """是否為深夜（依現實時間 / RTC）。time 取不到時回 False。"""
@@ -69,7 +105,7 @@ class Game:
         rows = [
             ("GROW",  m.growth,           config.CYAN),
             ("LIFE",  max(0, m.life),     config.GREEN),
-            ("SLEEP", m.sleep,            config.YELLOW),
+            ("ENRGY", m.sleep,            config.YELLOW),
         ]
         self.lcd.font(self.lcd.FONT_DefaultSmall)
         bx, bw = 70, 130
@@ -97,7 +133,7 @@ class Game:
         lcd.fillRect(0, 226, config.SCREEN_W, 14, 0x101018)
         lcd.font(lcd.FONT_DefaultSmall)
         lcd.print(
-            "DEV %s  G%d L%d S%d R%d%%" % (state_id, sig[1], sig[2], sig[3], sig[4]),
+            "DEV %s  G%d L%d E%d R%d%%" % (state_id, sig[1], sig[2], sig[3], sig[4]),
             4, 228, config.GREEN,
         )
 

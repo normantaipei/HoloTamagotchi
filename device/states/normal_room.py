@@ -37,6 +37,7 @@ class NormalRoom(State):
         self.menu_open = False
         self.event = None               # [kind, frames_left]，kind = "yawn" | "cheer"
         self.frame = 0
+        self.idle_frames = 0            # 連續無動作幀數（按鍵 / 搖晃會歸零）
         self._cur_sprite = None         # 目前顯示的角色圖 key（變了才重畫）
         self._menu_sig = (False, 0)      # 選單狀態簽章（開關 + 選項）
         self._draw_static()
@@ -57,6 +58,9 @@ class NormalRoom(State):
         g = self.game
         m = g.metrics
 
+        # 按鍵狀態整幀只讀一次（wasPressed 會清旗標），同時給「閒置偵測」與「選單」用
+        pa, pb, pc = g.btnA.wasPressed(), g.btnB.wasPressed(), g.btnC.wasPressed()
+
         # --- 每秒一次：更新數值 + 擲隨機事件 ---
         if self.frame % config.TICKS_PER_SEC == 0 and self.frame:
             m.tick(sleeping=False)
@@ -70,12 +74,19 @@ class NormalRoom(State):
             g.ending_kind = None
             return config.STATE_ENDING
 
-        # --- 睡眠觸發 ---
-        if m.sleep >= config.SLEEP_FORCE_TH or g.is_night():
+        # --- 閒置計時：有按鍵或搖晃 → 歸零，否則累加 ---
+        if pa or pb or pc or self._motion_active():
+            self.idle_frames = 0
+        else:
+            self.idle_frames += 1
+
+        # --- 睡眠觸發：精力過低（想睡），或閒置過久（1 小時沒動作）---
+        idle_limit = config.IDLE_SLEEP_SEC * config.TICKS_PER_SEC
+        if m.is_exhausted() or self.idle_frames >= idle_limit:
             return config.STATE_SLEEPING
 
         # --- 按鍵 ---
-        nxt = self._handle_buttons()
+        nxt = self._handle_buttons(pa, pb, pc)
         if nxt:
             return nxt
 
@@ -84,26 +95,33 @@ class NormalRoom(State):
         self.frame += 1
         return None
 
+    def _motion_active(self):
+        """陀螺儀偵測到明顯轉動 → 視為「有動作」。IMU 不可用時恆 False。"""
+        s = self.game.imu_motion()
+        if s is None:
+            return False
+        _amag, gmag = s
+        return gmag > config.IDLE_MOTION_TH
+
     def _roll_event(self):
         if self.event is not None:
             return
         m = self.game.metrics
-        if m.sleep > config.SLEEP_YAWN_TH and _rnd() < config.P_YAWN:
+        if m.sleep < config.SLEEP_YAWN_TH and _rnd() < config.P_YAWN:
             self.event = ["yawn", EVENT_FRAMES]
         elif _rnd() < config.P_CHEER:
             self.event = ["cheer", EVENT_FRAMES]
 
-    def _handle_buttons(self):
-        g = self.game
+    def _handle_buttons(self, pa, pb, pc):
         if not self.menu_open:
-            if g.btnB.wasPressed():
+            if pb:
                 self.menu_open = True
         else:
-            if g.btnA.wasPressed():
+            if pa:
                 self.menu.move(-1)
-            if g.btnC.wasPressed():
+            if pc:
                 self.menu.move(1)
-            if g.btnB.wasPressed():
+            if pb:
                 self.menu_open = False
                 return config.STATE_FEEDING if self.menu.selected() == 0 else config.STATE_MINI_GAME
         return None
