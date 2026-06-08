@@ -18,6 +18,37 @@ except ImportError:
     import os
 
 
+# ─── 暫時佔位：把「沒有圖片」的角色色塊畫成一隻有表情的小寵物 ───────────────
+# 這整段是過渡視覺。之後美術把圖放進角色資料夾、在 manifest 的 IMAGES 補一行，
+# 對應 key 就會自動換成圖片，這裡不會再被觸發。
+#
+# 想完全移除：把 PET_FACE 設成 False（自動退回原本的 [標籤] 色塊），
+#             或直接刪掉「PET_FACE / PET_EXPR / _pet / _dot / _arc」與
+#             draw() 內標了「<pet-face>」的那段分支即可，其餘程式不受影響。
+PET_FACE = True
+
+# 哪些資源 key 要畫成寵物臉、以及對應表情。
+# 沒列到的 key（背景 bg_*、食物 food_* 等）維持原本的色塊佔位。
+PET_EXPR = {
+    "egg":         "neutral",
+    "idle":        "happy",
+    "yawn":        "sleepy",
+    "cheer":       "excited",
+    "eat":         "eating",
+    "sleep":       "sleepy",
+    "dance":       "excited",
+    "end_idol":    "excited",
+    "end_office":  "neutral",
+    "end_pirate":  "happy",
+    "end_runaway": "sad",
+    "emo_s":       "excited",
+    "emo_a":       "happy",
+    "emo_c":       "neutral",
+    "emo_f":       "sad",
+}
+# ──────────────────────────────────────────────────────────────────────────
+
+
 def _exists(path):
     try:
         os.stat(path)
@@ -65,8 +96,11 @@ class AssetManager:
         rel = self.images.get(key)
         if rel and self._try_image(self.base + rel, x, y):
             return
-        # 2) 否則畫佔位色塊 + 標籤
-        self._placeholder(x, y, w, h, color, label)
+        # 2) 否則畫佔位。<pet-face> 角色類 key 畫成小寵物，其餘維持色塊 + 標籤。
+        if PET_FACE and key in PET_EXPR:
+            self._pet(x, y, w, h, color, PET_EXPR[key])
+        else:
+            self._placeholder(x, y, w, h, color, label)
 
     def _try_image(self, path, x, y):
         if not _exists(path):
@@ -86,3 +120,64 @@ class AssetManager:
         tx = x + 3
         ty = y + h // 2 - 6
         lcd.print("[" + label + "]", tx, ty, config.WHITE)
+
+    # ─── <pet-face> 暫時佔位用的小寵物（全程只用 fillRect/fillRoundRect，跨韌體最穩）───
+    def _dot(self, x, y, s, col):
+        self.lcd.fillRect(x, y, s, s, col)
+
+    def _arc(self, cx, my, half_w, sag, t, col):
+        """用一排小方點堆出拋物線嘴。sag>0：中間下凹（微笑）；sag<0：中間上凸（嘟嘴）。"""
+        n = 4
+        step = max(1, half_w // n)
+        for i in range(-n, n + 1):
+            px = cx + i * step
+            f = 1.0 - (i * i) / float(n * n)
+            py = my + int(sag * f)
+            self.lcd.fillRect(px - t // 2, py - t // 2, t, t, col)
+
+    def _pet(self, x, y, w, h, color, expr):
+        lcd = self.lcd
+        DARK, WHITE = config.BLACK, config.WHITE
+
+        # 身體：圓角色塊
+        lcd.fillRoundRect(x, y, w, h, min(w, h) // 4, color)
+
+        cx = x + w // 2
+        eye_y = y + h * 2 // 5
+        eye_dx = w // 4
+        es = max(4, w // 8)              # 眼睛大小
+        t = max(2, w // 18)             # 線條粗細
+        mouth_y = y + h * 3 // 5
+        half = w // 5
+        lx, rx = cx - eye_dx, cx + eye_dx
+
+        # 眼睛：sleepy/eating 閉眼（彎彎橫槓），其餘睜眼（白底黑眼珠）
+        if expr in ("sleepy", "eating"):
+            for ex in (lx, rx):
+                lcd.fillRect(ex - es // 2, eye_y, es, t, DARK)
+        else:
+            for ex in (lx, rx):
+                lcd.fillRoundRect(ex - es // 2, eye_y - es // 2, es, es, es // 3, WHITE)
+                lcd.fillRect(ex - t, eye_y - t, t * 2, t * 2, DARK)
+
+        # 嘴巴 + 表情點綴
+        if expr == "happy":
+            self._arc(cx, mouth_y, half, es // 2, t, DARK)              # 微笑
+        elif expr == "excited":
+            mw, mh = w // 3, h // 6
+            lcd.fillRoundRect(cx - mw // 2, mouth_y - mh // 2, mw, mh, mh // 2, DARK)  # 張嘴笑
+            self._dot(x + w - es, y + es, t * 2, config.YELLOW)        # 火花
+        elif expr == "eating":
+            mw = w // 5
+            lcd.fillRoundRect(cx - mw // 2, mouth_y - mw // 2, mw, mw, mw // 2, DARK)  # 圓嘴
+        elif expr == "sad":
+            self._arc(cx, mouth_y + es // 2, half, -(es // 2), t, DARK)  # 嘟嘴
+            self._dot(lx, eye_y + es, t, config.CYAN)                   # 淚滴
+        elif expr == "sleepy":
+            zx, zy = x + w - es * 2, y + es                             # 小 z
+            lcd.fillRect(zx, zy, es, t, WHITE)
+            lcd.fillRect(zx, zy + es, es, t, WHITE)
+            self._arc(cx, mouth_y, half // 2, t, t, DARK)              # 小嘴
+        else:  # neutral
+            lcd.fillRect(cx - half // 2, mouth_y, half, t, DARK)        # 直線嘴
+    # ─── </pet-face> ───
