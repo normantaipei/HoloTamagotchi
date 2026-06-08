@@ -2,6 +2,7 @@
 #
 # 架構總覽（模組化、可擴充）：
 #   config.py        全域設定（數值閾值、色票、狀態 ID）
+#   dev.py           DEV 專用狀態覆寫：讀 dev.json 快速重現情境（prod 零開銷）
 #   metrics.py       核心數值系統（成長/飽食/疲勞/音遊率）
 #   i18n.py          多國語言字串（assets/strings/<lang>.py）
 #   asset_manager.py 資源管理：有圖畫圖，沒圖畫「色塊 + 標籤」佔位
@@ -154,7 +155,12 @@ def main():
     game = Game()
     states = build_states(game)
 
-    current = config.STATE_INIT
+    # DEV：dev.json 可強制起始狀態，跳過開場蛋動畫直接進指定狀態除錯。
+    # 數值覆寫已在 Game()→Metrics() 建構時套用；未設定或非法值則照正常 init 流程。
+    import dev
+    current = dev.start_state()
+    if current not in states:
+        current = config.STATE_INIT
     state = states[current]
     state.on_enter()
     if config.DEV:

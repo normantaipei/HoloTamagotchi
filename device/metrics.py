@@ -4,6 +4,7 @@
 # 並提供結局判定的輔助方法。所有閾值都來自 config，這裡只放邏輯。
 
 import config
+import dev
 
 
 def clamp(v, lo, hi):
@@ -24,16 +25,20 @@ class Metrics:
         self.rhythm_plays = 0             # 音遊遊玩次數
         self.rhythm_sa = 0                # 音遊取得 S/A 評價次數
         self.days = 1                     # 遊戲天數（之後接 RTC 計算）
+        dev.apply_metrics(self)           # DEV：套用 dev.json 數值覆寫（prod 為 no-op）
 
     # --- 隨時間推移（每秒呼叫一次）---
     def tick(self, sleeping=False):
-        self.growth = clamp(self.growth + config.GROWTH_PER_SEC, 0, config.GROWTH_MAX)
+        if dev.FREEZE:                    # DEV：凍結數值，畫面停在當前情境方便觀察
+            return
+        s = dev.TIME_SCALE                # DEV：自然數值倍速（prod 恆為 1.0）
+        self.growth = clamp(self.growth + config.GROWTH_PER_SEC * s, 0, config.GROWTH_MAX)
         if sleeping:
             # 睡眠：暫停扣飽食度，精力逐漸回復
-            self.sleep = clamp(self.sleep + config.SLEEP_RECOVER_SEC, 0, config.SLEEP_FULL)
+            self.sleep = clamp(self.sleep + config.SLEEP_RECOVER_SEC * s, 0, config.SLEEP_FULL)
         else:
-            self.life = self.life + config.LIFE_PER_SEC     # 不設下限，讓它能 <0
-            self.sleep = clamp(self.sleep - config.SLEEP_DRAIN_PER_SEC, 0, config.SLEEP_FULL)
+            self.life = self.life + config.LIFE_PER_SEC * s   # 不設下限，讓它能 <0
+            self.sleep = clamp(self.sleep - config.SLEEP_DRAIN_PER_SEC * s, 0, config.SLEEP_FULL)
 
     # --- 互動 ---
     def feed(self, amount=None):
