@@ -1,36 +1,37 @@
-# HoloTamagotchi - M5Stack Fire 真機版 (UIFlow1 韌體 / m5stack 模組)
+# main.py — HoloTamagotchi 進入點（M5Stack Fire / UIFlow1 m5stack API）
 #
-# 開發方式（不燒錄，秒級更新）：
-#   mpremote connect /dev/cu.usbserial-XXXX run device/main.py
-# 改完存檔再跑一次即可。按 Ctrl-C 可中斷。
+# 架構總覽（模組化、可擴充）：
+#   config.py        全域設定（數值閾值、色票、狀態 ID）
+#   metrics.py       核心數值系統（成長/飽食/疲勞/音遊率）
+#   i18n.py          多國語言字串（assets/strings/<lang>.py）
+#   asset_manager.py 資源管理：有圖畫圖，沒圖畫「色塊 + 標籤」佔位
+#   ui.py            共用 UI（對話筐 / 選單高亮框）
+#   states/          狀態機，一狀態一檔（init / normal_room / feeding /
+#                    sleeping / minigame / ending）
+#   assets/          美術與文案資源（角色 manifest、圖片資料夾、字串表）
 #
-# 按鍵：A = 餵食   B = 玩耍   C = 睡覺
+# 開發（多檔需用 mount，讓本機模組直接載入、免燒錄、秒級更新）：
+#   .venv/bin/mpremote connect /dev/cu.usbserial-XXXX mount device run device/main.py
+#
+# 按鍵：A / B / C（各狀態內定義；普通房間 B=選單，選單內 A/C 移動、B 確認）。
 
-from m5stack import lcd, btnA, btnB, btnC
 import time
+import config
+import i18n
+from m5stack import lcd, btnA, btnB, btnC
 
-# --- 顏色 (0xRRGGBB) ---
-BG     = 0x181226   # 深紫背景
-WHITE  = 0xFFFFFF
-PINK   = 0xFF80C4   # 主色
-CYAN   = 0x78DCFF
-GREEN  = 0x78E682
-YELLOW = 0xFFDC50
-RED    = 0xF05A5A
-DARK   = 0x3C3250
-
-# --- 寵物狀態 (0~100) ---
-# 螢幕用英文（UIFlow1 字型對中文支援有限），中文放註解。
-stats = {"FOOD": 80, "MOOD": 70, "STAM": 90}
-
-PET_X, PET_Y, PET_W, PET_H = 120, 70, 80, 80   # 寵物身體位置
-
-
-SOUND_ON = False   # 暫時關閉聲音；要恢復改成 True
+from metrics import Metrics
+from asset_manager import AssetManager
+from states.init_state import InitState
+from states.normal_room import NormalRoom
+from states.feeding import Feeding
+from states.sleeping import Sleeping
+from states.minigame import MiniGame
+from states.ending import Ending
 
 
 def mute_speaker():
-    """把喇叭硬體靜音，消除 M5 喇叭的 DAC 底噪/爆音。"""
+    """靜音 M5 喇叭，消除 DAC 底噪/爆音。"""
     try:
         from m5stack import speaker
         speaker.setVolume(0)
@@ -39,123 +40,106 @@ def mute_speaker():
         pass
 
 
-def beep(freq, ms=120):
-    if not SOUND_ON:
-        return
-    try:
-        from m5stack import speaker
-        speaker.tone(freq, ms)
-    except Exception:
-        pass
+class Game:
+    """共用情境物件：硬體 + 子系統，傳給各 State 使用，避免到處 import。"""
+
+    def __init__(self):
+        self.lcd = lcd
+        self.btnA = btnA
+        self.btnB = btnB
+        self.btnC = btnC
+        self.metrics = Metrics()
+        i18n.set_lang(config.DEFAULT_LANG)
+        self.assets = AssetManager(lcd, config.DEFAULT_CHARACTER)
+        self.ending_kind = None   # 結局種類，由 Ending Evaluator 設定
+        self._dbg_sig = None      # DEV overlay 上次畫的內容簽章（用來避免每幀重畫）
+
+    def is_night(self):
+        """是否為深夜（依現實時間 / RTC）。time 取不到時回 False。"""
+        try:
+            h = time.localtime()[3]
+        except Exception:
+            return False
+        s, e = config.NIGHT_START_HOUR, config.NIGHT_END_HOUR
+        return (h >= s or h < e) if s > e else (s <= h < e)
+
+    def draw_metric_bars(self):
+        """畫三條核心數值條（成長 / 飽食 / 疲勞）。"""
+        m = self.metrics
+        rows = [
+            ("GROW",  m.growth,           config.CYAN),
+            ("LIFE",  max(0, m.life),     config.GREEN),
+            ("SLEEP", m.sleep,            config.YELLOW),
+        ]
+        self.lcd.font(self.lcd.FONT_DefaultSmall)
+        bx, bw = 70, 130
+        for i, (name, val, col) in enumerate(rows):
+            y = 128 + i * 15
+            self.lcd.print(name, 8, y, config.WHITE)
+            self.lcd.fillRect(bx, y, bw, 10, config.DARK)
+            f = int(bw * min(100, max(0, val)) / 100)
+            if f > 0:
+                self.lcd.fillRect(bx, y, f, 10, col)
+
+    def draw_debug_overlay(self, state_id, force=False):
+        """DEV 模式專用：螢幕最下方一行顯示「狀態名 + 核心數值」。
+
+        關鍵：只有在數值/狀態實際變動時才重畫（簽章比對），避免每幀重畫造成閃爍。
+        force=True 用於剛切換狀態、畫面被重畫後強制補上這一行。
+        prod 模式（config.DEV=False）由主迴圈完全跳過，畫面保持乾淨。
+        """
+        m = self.metrics
+        sig = (state_id, int(m.growth), int(m.life), int(m.sleep), int(m.rhythm_rate()))
+        if not force and sig == self._dbg_sig:
+            return
+        self._dbg_sig = sig
+        lcd = self.lcd
+        lcd.fillRect(0, 226, config.SCREEN_W, 14, 0x101018)
+        lcd.font(lcd.FONT_DefaultSmall)
+        lcd.print(
+            "DEV %s  G%d L%d S%d R%d%%" % (state_id, sig[1], sig[2], sig[3], sig[4]),
+            4, 228, config.GREEN,
+        )
 
 
-def draw_static():
-    """畫一次就好：背景、標題、底部按鍵提示。"""
-    lcd.clear(BG)
-    lcd.font(lcd.FONT_DejaVu24)
-    lcd.print("HoloTama", 95, 12, PINK)
-    lcd.font(lcd.FONT_DefaultSmall)
-    lcd.print("A:Feed   B:Play   C:Sleep", 70, 224, DARK)
+def build_states(game):
+    return {
+        config.STATE_INIT:        InitState(game),
+        config.STATE_NORMAL_ROOM: NormalRoom(game),
+        config.STATE_FEEDING:     Feeding(game),
+        config.STATE_SLEEPING:    Sleeping(game),
+        config.STATE_MINI_GAME:   MiniGame(game),
+        config.STATE_ENDING:      Ending(game),
+    }
 
 
-def draw_face(blink, mood):
-    """重畫寵物臉，做眨眼/表情。"""
-    lcd.fillRoundRect(PET_X, PET_Y, PET_W, PET_H, 14, PINK)
-    eye_y = PET_Y + 30
-    lx, rx = PET_X + 24, PET_X + 56
-    if blink:
-        lcd.fillRect(lx - 6, eye_y, 12, 3, DARK)
-        lcd.fillRect(rx - 6, eye_y, 12, 3, DARK)
-    else:
-        lcd.fillCircle(lx, eye_y, 7, WHITE)
-        lcd.fillCircle(rx, eye_y, 7, WHITE)
-        lcd.fillCircle(lx + 2, eye_y + 1, 3, DARK)
-        lcd.fillCircle(rx + 2, eye_y + 1, 3, DARK)
-    # 嘴巴依心情
-    my = PET_Y + 56
-    if mood == "happy":
-        lcd.fillRoundRect(PET_X + 26, my - 4, 28, 8, 4, DARK)
-    elif mood == "sad":
-        lcd.fillRoundRect(PET_X + 26, my, 28, 8, 4, DARK)
-        lcd.fillRect(PET_X + 26, my, 28, 4, PINK)
-    else:
-        lcd.fillRect(PET_X + 34, my, 12, 5, DARK)
+def main():
+    mute_speaker()
+    game = Game()
+    states = build_states(game)
+
+    current = config.STATE_INIT
+    state = states[current]
+    state.on_enter()
+    if config.DEV:
+        game.draw_debug_overlay(current, force=True)
+    print("HoloTamagotchi started @", current)
+
+    while True:
+        nxt = state.update()
+        transitioned = False
+        if nxt and nxt != current:
+            state.on_exit()
+            current = nxt
+            state = states[current]
+            state.on_enter()
+            transitioned = True
+            print("-> state", current)
+        # DEV 疊圖：只在數值變動或剛切換狀態時重畫（避免閃爍）；prod 完全不畫
+        if config.DEV:
+            game.draw_debug_overlay(current, force=transitioned)
+        time.sleep_ms(config.FRAME_MS)
 
 
-def draw_bars():
-    """三條狀態條。"""
-    lcd.font(lcd.FONT_DejaVu18)
-    bar_x, bar_w = 110, 150
-    for i, name in enumerate(stats.keys()):
-        y = 150 + i * 22
-        val = stats[name]
-        lcd.print(name, 16, y, WHITE)
-        lcd.fillRect(bar_x, y, bar_w, 12, DARK)          # 底槽
-        col = GREEN if val > 50 else (YELLOW if val > 25 else RED)
-        fill = int(bar_w * val / 100)
-        if fill > 0:
-            lcd.fillRect(bar_x, y, fill, 12, col)
-
-
-def current_mood():
-    avg = sum(stats.values()) / 3
-    if avg > 60:
-        return "happy"
-    if avg > 30:
-        return "neutral"
-    return "sad"
-
-
-def clamp(v):
-    return max(0, min(100, v))
-
-
-# --- 動作 ---
-def feed():
-    stats["FOOD"] = clamp(stats["FOOD"] + 18)
-    stats["MOOD"] = clamp(stats["MOOD"] + 4)
-    beep(880)
-    print("Feed ->", stats["FOOD"])
-
-
-def play():
-    stats["MOOD"] = clamp(stats["MOOD"] + 18)
-    stats["STAM"] = clamp(stats["STAM"] - 8)
-    beep(660)
-    print("Play ->", stats["MOOD"])
-
-
-def sleep_action():
-    stats["STAM"] = clamp(stats["STAM"] + 25)
-    beep(440)
-    print("Sleep ->", stats["STAM"])
-
-
-# --- 主迴圈 ---
-mute_speaker()
-draw_static()
-draw_bars()
-frame = 0
-print("HoloTamagotchi running on Fire. A=Feed B=Play C=Sleep")
-
-while True:
-    # 邊緣偵測：按下瞬間觸發一次
-    if btnA.wasPressed():
-        feed();         draw_bars()
-    if btnB.wasPressed():
-        play();         draw_bars()
-    if btnC.wasPressed():
-        sleep_action(); draw_bars()
-
-    # 每秒 (~20幀) 衰減狀態
-    if frame % 20 == 0 and frame > 0:
-        stats["FOOD"] = clamp(stats["FOOD"] - 2)
-        stats["MOOD"] = clamp(stats["MOOD"] - 1)
-        stats["STAM"] = clamp(stats["STAM"] - 1)
-        draw_bars()
-
-    blink = (frame % 40) < 3
-    draw_face(blink, current_mood())
-
-    frame += 1
-    time.sleep_ms(50)
+if __name__ == "__main__":
+    main()
