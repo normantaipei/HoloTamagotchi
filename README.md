@@ -1,0 +1,2 @@
+# HoloTamagotchi
+建構在M5Stack的Hololive粉絲向電子雞遊戲
