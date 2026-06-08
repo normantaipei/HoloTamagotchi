@@ -26,7 +26,8 @@ except ImportError:
         return random.random()
 
 MENU_ITEMS = ["FEED", "GAME"]
-EVENT_FRAMES = 24                       # 單次事件動圖持續幀數
+EVENT_FRAMES = 24                       # 哈欠等事件動圖持續幀數（24×50ms≈1.2s）
+CHEER_FRAMES = 60                       # 加油話語顯示幀數（60×50ms≈3.0s）
 # 角色 / 事件圖位置：水平置中（114+92/2=160）、垂直置中（中點≈122≈螢幕中心120），
 # 頭頂上方留給對話泡泡。尺寸較原始放大約 15%（80×74 → 92×85）。
 SPR_X, SPR_Y, SPR_W, SPR_H = 114, 80, 92, 85
@@ -113,7 +114,7 @@ class NormalRoom(State):
         if m.sleep < config.SLEEP_YAWN_TH and _rnd() < config.P_YAWN:
             self.event = ["yawn", EVENT_FRAMES]
         elif _rnd() < config.P_CHEER:
-            self.event = ["cheer", EVENT_FRAMES]
+            self.event = ["cheer", CHEER_FRAMES]
 
     def _handle_buttons(self, pa, pb, pc):
         if not self.menu_open:

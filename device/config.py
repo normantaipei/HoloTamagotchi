@@ -35,10 +35,10 @@ CYAN   = 0x78DCFF
 
 # --- 核心數值：初始值與每秒變化量 ---
 GROWTH_MAX        = 100      # GrowthIndex 滿值 → 觸發正常結局
-GROWTH_PER_SEC    = 0.05     # 成長指數隨時間自然增加
+GROWTH_PER_SEC    = 0.0001   # 成長指數隨時間自然增加（100/0.0001=100萬秒≈11.6天 → 正常結局約 1.5 週）
 LIFE_INIT         = 80       # BasicLifeIndex 初始飽食度
-LIFE_PER_SEC      = -0.4     # 飽食度隨時間下降
-LIFE_FEED_GAIN    = 18       # 餵食一次增加量
+LIFE_PER_SEC      = -0.0003  # 飽食度隨時間下降（80/0.0003≈26.7萬秒≈3.1天從滿到離家出走）
+LIFE_FEED_GAIN    = 18       # 餵食一次增加量（≈18/0.0003=6萬秒≈16.7小時的份量）
 LIFE_BAD_END      = 0        # BasicLifeIndex < 此值 → 壞結局
 # SleepIndex 改為「精力值」：醒著時下降、睡覺回復；過低就想睡，睡飽自然醒。
 SLEEP_INIT          = 100    # 精力初始值（滿）
