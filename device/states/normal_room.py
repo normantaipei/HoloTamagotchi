@@ -27,13 +27,16 @@ except ImportError:
 
 MENU_ITEMS = ["FEED", "GAME"]
 EVENT_FRAMES = 24                       # 單次事件動圖持續幀數
-SPR_X, SPR_Y, SPR_W, SPR_H = 120, 40, 80, 74   # 角色 / 事件圖位置
+# 角色 / 事件圖位置：水平置中（114+92/2=160）、垂直置中（中點≈122≈螢幕中心120），
+# 頭頂上方留給對話泡泡。尺寸較原始放大約 15%（80×74 → 92×85）。
+SPR_X, SPR_Y, SPR_W, SPR_H = 114, 80, 92, 85
 
 
 class NormalRoom(State):
     def on_enter(self):
         self.menu = Menu(self.game.lcd, MENU_ITEMS)
-        self.dialog = DialogBox(self.game.lcd, y=150, h=40)
+        # 對話泡泡：尾巴指向角色頭頂中心，浮在角色上方（用預設位置即可）。
+        self.dialog = DialogBox(self.game.lcd, tail_x=SPR_X + SPR_W // 2)
         self.menu_open = False
         self.event = None               # [kind, frames_left]，kind = "yawn" | "cheer"
         self.frame = 0
@@ -144,7 +147,9 @@ class NormalRoom(State):
                 was_cheer = (self.event[0] == "cheer")
                 self.event = None
                 if was_cheer:
-                    self._bg_fill(*self.dialog.rect)
+                    # 清掉整顆泡泡（含尾巴）。下一幀角色圖由 cheer 換回 idle 會重畫，
+                    # 自動補回被尾巴蓋住的頭頂，不會留下殘影。
+                    self._bg_fill(*self.dialog.clear_rect)
 
         # --- 選單：只在開關 / 移動時重畫 ---
         sig = (self.menu_open, self.menu.selected())
