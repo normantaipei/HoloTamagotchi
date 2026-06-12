@@ -32,6 +32,12 @@ CHEER_FRAMES = 60                       # 加油話語顯示幀數（60×50ms≈
 # 頭頂上方留給對話泡泡。尺寸較原始放大約 15%（80×74 → 92×85）。
 SPR_X, SPR_Y, SPR_W, SPR_H = 114, 80, 92, 85
 
+# 底部按鈕提示列：水平對齊三顆實體鍵（A 左 / B 中 / C 右）。
+# 文字走 i18n（保留多語言空間），左右移動則用箭頭圖案（語言無關）。
+HINT_CX = (53, 160, 267)                       # 三顆鍵的水平中心
+HINT_TOP = 216                                 # 提示文字頂端 y
+HINT_CLEAR = (0, 206, config.SCREEN_W, 34)     # 重畫前要清掉的範圍
+
 
 class NormalRoom(State):
     def on_enter(self):
@@ -44,6 +50,7 @@ class NormalRoom(State):
         self.idle_frames = 0            # 連續無動作幀數（按鍵 / 搖晃會歸零）
         self._cur_sprite = None         # 目前顯示的角色圖 key（變了才重畫）
         self._menu_sig = (False, 0)      # 選單狀態簽章（開關 + 選項）
+        self._hint_open = False          # 目前提示列對應的開關狀態（變了才重畫）
         self._draw_static()
 
     def _draw_static(self):
@@ -51,8 +58,39 @@ class NormalRoom(State):
         g.assets.draw("bg_room", 0, 0)
         g.lcd.font(g.lcd.FONT_DejaVu24)
         g.lcd.print(g.assets.char.NAME[:14], 8, 6, config.WHITE)
+        self._draw_hints(False)
+
+    def _draw_hints(self, menu_open):
+        """底部按鈕提示列。closed：右鍵=開選單；open：左右=箭頭、中間=確認。"""
+        g = self.game
+        self._bg_fill(*HINT_CLEAR)
         g.lcd.font(g.lcd.FONT_DefaultSmall)
-        g.lcd.print("C: Menu", 8, 210, config.DARK)
+        cy = HINT_TOP + 7
+        if menu_open:
+            self._hint_arrow(HINT_CX[0], cy, "left")             # A：上一個
+            self._hint_text(i18n.get("btn_select"), HINT_CX[1])  # B：確認
+            self._hint_arrow(HINT_CX[2], cy, "right")            # C：下一個
+        else:
+            self._hint_text(i18n.get("btn_menu"), HINT_CX[2])    # C：開選單
+
+    def _hint_text(self, s, cx):
+        lcd = self.game.lcd
+        try:
+            w = lcd.textWidth(s)
+        except Exception:
+            w = len(s) * 7                       # 韌體無 textWidth 時的粗估
+        lcd.print(s, cx - w // 2, HINT_TOP, config.DARK)
+
+    def _hint_arrow(self, cx, cy, direction):
+        # 逐列 fillRect 疊出三角形（跨韌體最穩，與 DialogBox 尾巴同手法）。
+        lcd = self.game.lcd
+        hr, w = 8, 12                            # 半高、底寬
+        for dy in range(-hr, hr + 1):
+            span = (w * (hr - abs(dy))) // hr    # 該列寬度，往尖端收斂到 0
+            if span <= 0:
+                continue
+            x = cx - w // 2 if direction == "right" else cx - w // 2 + (w - span)
+            lcd.fillRect(x, cy + dy, span, 1, config.DARK)
 
     def _bg_fill(self, x, y, w, h):
         # 用背景色清掉一塊（移除動態元件）。目前背景為純色塊；之後接背景圖再優化成重貼圖。
@@ -160,3 +198,8 @@ class NormalRoom(State):
             else:
                 self._bg_fill(0, 150, config.SCREEN_W, 40)
             self._menu_sig = sig
+
+        # --- 提示列：只在選單開關切換時重畫（選項移動不影響提示）---
+        if self.menu_open != self._hint_open:
+            self._draw_hints(self.menu_open)
+            self._hint_open = self.menu_open
