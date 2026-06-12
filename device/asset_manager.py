@@ -74,6 +74,16 @@ class AssetManager:
     def color(self, name, default=config.DARK):
         return self.theme.get(name, default)
 
+    def has_image(self, key):
+        """這個 key 是否已有可用的圖片素材（美術已在 IMAGES 補上路徑且檔案存在）。
+
+        給各 state 判斷要不要畫「佔位用的裝飾」——例如睡覺的 Zzz、吃東西的
+        Nom nom、摸頭時頭上的手與愛心。一旦美術放好對應角色圖，這些就自動關掉，
+        讓美術能把這些元素直接畫進素材裡、完全自由發揮（與佔位色塊同套退場邏輯）。
+        """
+        rel = self.images.get(key)
+        return bool(rel) and _exists(self.base + rel)
+
     def draw(self, key, x=None, y=None, w=None, h=None, show_label=True):
         """畫一個資源。有圖片就畫圖片，否則畫佔位色塊 + 標籤文字。
 

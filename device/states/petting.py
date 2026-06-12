@@ -52,6 +52,9 @@ class Petting(State):
         self._hud = None
         self._drawn = False
         g = self.game
+        # 佔位裝飾（頭上的摸頭手 + 兩側愛心）：美術放好摸頭圖後自動關掉，
+        # 可把手 / 愛心等頭上元素直接畫進素材裡，完全自由發揮。
+        self._show_deco = not g.assets.has_image("pet")
         lcd = g.lcd
         g.assets.draw("bg_room", 0, 0)
         lcd.font(lcd.FONT_DejaVu18)
@@ -86,8 +89,8 @@ class Petting(State):
                 self.combo = 0                # 同一邊連按 → 斷 Combo
             self.last_dir = d
 
-        # 摸頭手：方向改變時重畫（擦掉另一邊、畫新一邊）。
-        if d != 0 and d != self._hand_dir:
+        # 摸頭手：方向改變時重畫（擦掉另一邊、畫新一邊）。美術放圖後關掉。
+        if self._show_deco and d != 0 and d != self._hand_dir:
             self._draw_hand(d, bg)
             self._hand_dir = d
 
@@ -97,8 +100,8 @@ class Petting(State):
             g.assets.draw(key, SPR_X, SPR_Y, SPR_W, SPR_H)
             self._cur_sprite = key
 
-        # 愛心：開心反應期間顯示，結束擦掉（只在切換時重畫）。
-        show = self.react > 0
+        # 愛心：開心反應期間顯示，結束擦掉（只在切換時重畫）。美術放圖後關掉。
+        show = self._show_deco and self.react > 0
         if show != self._hearts_on:
             for hx in HEART_X:
                 if show:

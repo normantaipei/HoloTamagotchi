@@ -29,9 +29,11 @@ class InitState(State):
         cx, cy = config.SCREEN_W // 2, config.SCREEN_H // 2
         g.lcd.fillRect(cx - MAXW // 2, cy - MAXH // 2, MAXW, MAXH, config.BLACK)
         g.assets.draw("egg", w=w, h=h)
-        g.lcd.font(g.lcd.FONT_DefaultSmall)
-        g.lcd.fillRect(60, 213, 200, 14, config.BLACK)
-        g.lcd.print("[ANIM: Egg cracking %d%%]" % int(frac * 100), 70, 215, config.WHITE)
+        # 佔位進度字：美術放好蛋的動畫圖後自動關掉，可把破殼效果直接畫進素材裡。
+        if not g.assets.has_image("egg"):
+            g.lcd.font(g.lcd.FONT_DefaultSmall)
+            g.lcd.fillRect(60, 213, 200, 14, config.BLACK)
+            g.lcd.print("[ANIM: Egg cracking %d%%]" % int(frac * 100), 70, 215, config.WHITE)
         self.t += 1
         if self.t > ANIM_FRAMES:
             return config.STATE_NORMAL_ROOM

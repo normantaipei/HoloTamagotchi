@@ -73,7 +73,9 @@ class Feeding(State):
             g.assets.draw("bg_room", 0, 0)
             g.assets.draw("eat", EAT_X, EAT_Y, EAT_W, EAT_H)   # 嚼食圖（角色）
             g.lcd.font(g.lcd.FONT_DefaultSmall)
-            g.lcd.print("Nom nom...", 130, 216, config.WHITE)  # 在食物路徑下方，整段保留
+            # 佔位裝飾：美術放好嚼食圖後自動關掉，可把 Nom nom 直接畫進素材裡。
+            if not g.assets.has_image("eat"):
+                g.lcd.print("Nom nom...", 130, 216, config.WHITE)  # 在食物路徑下方
             self._food_key = FOOD_KEYS[self.menu.selected()]   # 記住玩家選的甜點
             self._food_rect = None                             # 上一格食物殘影範圍
             self._sig = None                                   # 上一幀畫面簽章（相同就不重畫）

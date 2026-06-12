@@ -27,7 +27,9 @@ class Sleeping(State):
         g = self.game
         g.lcd.clear(BG)
         g.lcd.font(g.lcd.FONT_DefaultSmall)
-        g.lcd.print("Zzz...", 70, 56, config.WHITE)
+        # 佔位裝飾：美術放好睡覺圖後自動關掉，可把 Zzz 直接畫進素材裡。
+        if not g.assets.has_image("sleep"):
+            g.lcd.print("Zzz...", 70, 56, config.WHITE)
         hint = "Shake or C: wake up" if g.imu is not None else "C: wake up"
         g.lcd.print(hint, 8, 210, config.DARK)
 
