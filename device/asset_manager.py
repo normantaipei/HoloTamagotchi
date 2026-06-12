@@ -73,10 +73,11 @@ class AssetManager:
     def color(self, name, default=config.DARK):
         return self.theme.get(name, default)
 
-    def draw(self, key, x=None, y=None, w=None, h=None):
+    def draw(self, key, x=None, y=None, w=None, h=None, show_label=True):
         """畫一個資源。有圖片就畫圖片，否則畫佔位色塊 + 標籤文字。
 
         x/y/w/h 省略時，採用 manifest 的預設尺寸並置中。
+        show_label=False：佔位色塊不畫標籤文字（例如動畫中移動的小物件）。
         """
         spec = self.sprites.get(key)
         if spec is None:
@@ -100,7 +101,7 @@ class AssetManager:
         if PET_FACE and key in PET_EXPR:
             self._pet(x, y, w, h, color, PET_EXPR[key])
         else:
-            self._placeholder(x, y, w, h, color, label)
+            self._placeholder(x, y, w, h, color, label if show_label else None)
 
     def _try_image(self, path, x, y):
         if not _exists(path):
@@ -115,6 +116,8 @@ class AssetManager:
     def _placeholder(self, x, y, w, h, color, label):
         lcd = self.lcd
         lcd.fillRect(x, y, w, h, color)
+        if not label:                        # show_label=False：只畫色塊，不畫文字
+            return
         lcd.font(lcd.FONT_DefaultSmall)
         # 標籤大致置中（粗略估字寬，夠用即可）
         tx = x + 3
