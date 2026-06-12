@@ -1,0 +1,61 @@
+# 美術動畫 Review 模擬器（web/）
+
+給**美術**用的瀏覽器工具：上傳素材後，逐一檢查每個動作在 **M5Stack Fire（320×240, 20fps）** 上的動畫播放是否符合預期 —— 不用接板子、不用燒錄。
+
+模擬器把裝置端的繪圖邏輯（`device/asset_manager.py`、`device/ui.py`、`device/states/*.py`）原封不動搬到 canvas，所以**你在這裡看到的播放，就是真機上的播放**：位置、縮放、點頭、呼吸、一口一口咬、摸頭手擺動、佔位色塊與小寵物臉都一致。
+
+## 啟動
+
+```bash
+cd web
+npm install
+npm run dev      # 開 http://localhost:3000
+```
+
+其他指令：`npm run build`（正式打包）、`npm run generate`（輸出純靜態，可丟任何靜態空間）、`npm run preview`。
+
+## 怎麼用
+
+版面參考手稿，分成三段：
+
+1. **頂部「動作 List」**：選一個動作分頁（Idle / Eat / Sleep / Yawn / Cheer / Pet / Egg / Sing / Ending / Result / BG）。
+2. **中段「幀序編輯」**：該動作的逐幀列（Frame 01、02…）。
+   - 每張卡片點圖可**換圖**（Frame 上傳）；下方三顆鈕 = **◀ 往前移 / 🗑 刪除 / ▶ 往後移**。
+   - 末端「**＋**」= **Frame 新增**（可多選，依檔名數字排序）。
+   - 多部件動作（Eat / Ending / Result / BG）上方會多一排「部件」可切（角色 / 各甜點 / 各結局圖…）。
+3. **右側「Anime」**：把目前部件的多幀直接**輪播**，快速看順不順（play/pause、循環、fps）。
+4. **底部按鈕**：
+   - **💾 Save 工作儲存**：把整份工作匯出成 `.json`（含所有幀），可備份 / 交接；平常也會自動存在瀏覽器。**📂 載入**可讀回。
+   - **⚙ Compile 模擬**（或右側「▶ 模擬」）：開**裝置實機模擬器**，在 320×240 螢幕上用與真機相同的繪圖邏輯重播（含背景、程序動畫、佔位行為）。內含暫停 / 逐幀 / 時間軸 / 速度 / 放大。
+
+### 單幀 vs 多幀
+- **一格放一張**：重現「裝置目前的行為」——靜圖 + 程序動畫（蛋會放大、睡覺上下呼吸、吃東西食物一口口變小）。
+- **一格放多張**：逐幀動畫。Anime 即時輪播，「模擬」可看裝置上的實際播放。這是 `device/assets/README.md` 標記為 TODO 的未來方向，先在這裡驗證效果。
+
+## 動作 ↔ 裝置 state 對照
+
+| 動作 | 來源 | 重點 |
+|------|------|------|
+| 破殼 Egg | `states/init_state.py` | 蛋隨進度放大（24 幀 ≈ 1.2s，一次性） |
+| 待機 Idle | `states/normal_room.py` | 主畫面門面 |
+| 打哈欠 Yawn | `states/normal_room.py` | 疲勞高隨機觸發（24 幀）→ 回待機 |
+| 加油 Cheer | `states/normal_room.py` | 隨機觸發（60 幀）+ 對話泡泡 |
+| 餵食 Eat | `states/feeding.py` | 4 口 × 9 幀 + 6 收尾；食物逐口變小、角色點頭。可換 5 種甜點 |
+| 睡覺 Sleep | `states/sleeping.py` | 2 幀呼吸輪播（每 10 幀換 + 上下 2px） |
+| 摸頭 Pet | `states/petting.py` | 時間內摸滿親密度條＝成功、沒滿＝失敗；手左右擺、開心 + 愛心（自動示範） |
+| 結局 Ending | `states/ending.py` | 4 種結局圖，可切分支 |
+| 摸頭結算 Result | `states/petting.py` | 成功 / 失敗 2 張情緒圖，可切換 |
+
+## 對應裝置端素材
+
+格子的命名、建議資料夾與尺寸，完全對齊 `device/assets/characters/marine/`：
+- `backgrounds/`：`bg_room` `bg_game`（320×240）
+- `anim/`：`egg` `idle` `yawn` `cheer` `pet` `eat` `sleep`
+- `portraits/`：`end_*`（140×150）、`emo_success` / `emo_fail`（90×100）
+- `food/`：`food_0`~`food_4`（50×50）
+
+驗收滿意後，把圖放進裝置端對應資料夾、在 `character.py` 的 `IMAGES` 補上路徑即可（流程見 `device/assets/README.md`）。
+
+## 備註
+- 純前端、無後端：圖片只存在瀏覽器（`localStorage`），重整不會掉，也**不會上傳到任何伺服器**。
+- 規格若有更新，請同步 `web/data/manifest.ts`（sprite 清單 / 色票）與 `web/utils/animations.ts`（動畫腳本），來源為 `device/` 對應檔案。

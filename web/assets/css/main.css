@@ -1,0 +1,20 @@
+/* main.css — 全域基本樣式（深色，貼近裝置氛圍）。 */
+:root {
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body, #__nuxt {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+body {
+  background: #0d0a12;
+  color: #e8e3f0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans TC', 'PingFang TC', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+button { font-family: inherit; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #2a2333; border-radius: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
