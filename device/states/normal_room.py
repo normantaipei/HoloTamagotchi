@@ -171,11 +171,13 @@ class NormalRoom(State):
 
         # --- 角色 / 事件動圖：只在 key 改變時重畫（避免每幀重畫造成閃爍）---
         key = self.event[0] if self.event else "idle"
+        sprite_redrawn = False
         if key != self._cur_sprite:
             g.assets.draw(key, SPR_X, SPR_Y, SPR_W, SPR_H)
             if key == "cheer":
                 self.dialog.show("cheer_msg_01")
             self._cur_sprite = key
+            sprite_redrawn = True
 
         # 事件倒數結束 → 清掉對話筐（角色圖下一輪會換回 idle 蓋掉事件圖）
         if self.event:
@@ -188,9 +190,9 @@ class NormalRoom(State):
                     # 自動補回被尾巴蓋住的頭頂，不會留下殘影。
                     self._bg_fill(*self.dialog.clear_rect)
 
-        # --- 選單：只在開關 / 移動時重畫 ---
+        # --- 選單：開關 / 移動時重畫；角色圖剛重畫又蓋到選單時也要補畫回前景 ---
         sig = (self.menu_open, self.menu.selected())
-        if sig != self._menu_sig:
+        if sig != self._menu_sig or (self.menu_open and sprite_redrawn):
             if self.menu_open:
                 self.menu.draw(150)
             else:
