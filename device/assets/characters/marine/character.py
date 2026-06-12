@@ -26,6 +26,7 @@ SPRITES = {
     "idle":         (0xF0405A, "Marine idle",    80,  74),
     "yawn":         (0xC0506A, "ANIM: Yawn",     80,  74),
     "cheer":        (0xFF6080, "ANIM: Cheer",    80,  74),
+    "pet":          (0xFF7090, "ANIM: Pet",      92,  85),
     "eat":          (0xF07090, "ANIM: Eat",      80,  74),
     "sleep":        (0x405080, "ANIM: Sleep",   100,  70),
     "dance":        (0xFF80A0, "ANIM: Sing",     60,  36),

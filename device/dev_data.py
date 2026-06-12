@@ -9,7 +9,7 @@
 #
 # 欄位：
 #   start_state    強制起始狀態，跳過開場蛋動畫直接進指定狀態
-#                  ("init" / "normal_room" / "feeding" / "sleeping" / "mini_game" / "ending")
+#                  ("init" / "normal_room" / "feeding" / "sleeping" / "petting" / "ending")
 #   skip_imu       跳過 IMU 初始化（mount 開發 / 無此硬體時設 True，搖一搖靜默停用）
 #   freeze_metrics 凍結數值（tick 不再自然增減），畫面停住方便觀察
 #   time_scale     自然數值倍速（如 60 → 1 秒當 1 分鐘跑），快速驗證自然轉場

@@ -81,5 +81,5 @@ STATE_INIT        = "init"          # 初始化 / 重置（蛋裂開）
 STATE_NORMAL_ROOM = "normal_room"   # 普通房間 / 待機
 STATE_FEEDING     = "feeding"       # 餵食互動
 STATE_SLEEPING    = "sleeping"      # 睡眠
-STATE_MINI_GAME   = "mini_game"     # 音樂遊戲
+STATE_PETTING     = "petting"       # 摸頭互動
 STATE_ENDING      = "ending"        # 結局

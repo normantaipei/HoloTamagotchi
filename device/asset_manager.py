@@ -34,6 +34,7 @@ PET_EXPR = {
     "idle":        "happy",
     "yawn":        "sleepy",
     "cheer":       "excited",
+    "pet":         "happy",
     "eat":         "eating",
     "sleep":       "sleepy",
     "dance":       "excited",

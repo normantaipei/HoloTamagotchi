@@ -3,7 +3,7 @@
 # 職責：
 #   - Main Loop：每秒更新核心數值。
 #   - 隨機事件：疲勞高 → 打哈欠；一般 → 機率「加油」並叫出對話筐。
-#   - 按鍵：B 叫出選單（FEED / GAME），選 FEED→餵食、GAME→音遊。
+#   - 按鍵：B 叫出選單（FEED / PET），選 FEED→餵食、PET→摸頭互動。
 #   - 結局判定（Ending Evaluator）：壞結局優先，再判成長結局。
 #   - 睡眠觸發：疲勞達標或進入深夜 → 睡眠。
 #
@@ -25,7 +25,7 @@ except ImportError:
     def _rnd():
         return random.random()
 
-MENU_ITEMS = ["FEED", "GAME"]
+MENU_ITEMS = ["FEED", "PET"]
 EVENT_FRAMES = 24                       # 哈欠等事件動圖持續幀數（24×50ms≈1.2s）
 CHEER_FRAMES = 60                       # 加油話語顯示幀數（60×50ms≈3.0s）
 # 角色 / 事件圖位置：水平置中（114+92/2=160）、垂直置中（中點≈122≈螢幕中心120），
@@ -135,7 +135,7 @@ class NormalRoom(State):
                 self.menu.move(1)
             if pb:
                 self.menu_open = False
-                return config.STATE_FEEDING if self.menu.selected() == 0 else config.STATE_MINI_GAME
+                return config.STATE_FEEDING if self.menu.selected() == 0 else config.STATE_PETTING
         return None
 
     def _render(self):

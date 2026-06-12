@@ -8,7 +8,7 @@
 #   asset_manager.py 資源管理：有圖畫圖，沒圖畫「色塊 + 標籤」佔位
 #   ui.py            共用 UI（對話筐 / 選單高亮框）
 #   states/          狀態機，一狀態一檔（init / normal_room / feeding /
-#                    sleeping / minigame / ending）
+#                    sleeping / petting / ending）
 #   assets/          美術與文案資源（角色 manifest、圖片資料夾、字串表）
 #
 # 開發（多檔需用 mount，讓本機模組直接載入、免燒錄、秒級更新）：
@@ -28,7 +28,7 @@ from states.init_state import InitState
 from states.normal_room import NormalRoom
 from states.feeding import Feeding
 from states.sleeping import Sleeping
-from states.minigame import MiniGame
+from states.petting import Petting
 from states.ending import Ending
 
 
@@ -148,7 +148,7 @@ def build_states(game):
         config.STATE_NORMAL_ROOM: NormalRoom(game),
         config.STATE_FEEDING:     Feeding(game),
         config.STATE_SLEEPING:    Sleeping(game),
-        config.STATE_MINI_GAME:   MiniGame(game),
+        config.STATE_PETTING:     Petting(game),
         config.STATE_ENDING:      Ending(game),
     }
 
