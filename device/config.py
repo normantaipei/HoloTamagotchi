@@ -23,15 +23,22 @@ DEFAULT_CHARACTER = "marine"        # 預設角色（寶鐘瑪琳）
 # zh_tw 字串仍備妥，之後接上中文字型即可切換。
 DEFAULT_LANG = "en"
 
-# --- 通用色票 (0xRRGGBB) ---
+# --- 通用色票 (0xRRGGBB) — Cover Corp 風格：乾淨白 + 天藍漸層 accent ---
+# 參考 cover-corp.com 官網配色：白底、深板岩字、招牌天藍漸層 (#0099EB→#38ABE0→#51CCE8)。
 WHITE  = 0xFFFFFF
 BLACK  = 0x000000
-DARK   = 0x3C3250
-GREEN  = 0x78E682
-YELLOW = 0xFFDC50
-RED    = 0xF05A5A
-PINK   = 0xFF80C4
-CYAN   = 0x78DCFF
+DARK   = 0x12303D            # 冷調深板岩：UI 底／非選取格／數值條底
+GREEN  = 0x78E682            # 語意色：飽食度（生命）
+YELLOW = 0xFFDC50            # 語意色：精力
+RED    = 0xF05A5A            # 語意色：警示／愛心
+PINK   = 0x48C5F4            # 主互動 accent（選單高亮等）→ 改為 Cover 亮天藍（沿用 PINK 名以免大改）
+CYAN   = 0x51CCE8            # Cover 淺青
+
+# --- Cover Corp 品牌天藍漸層三色（給漸層／重點 chrome 用）---
+BRAND_DEEP = 0x0099EB        # 招牌深天藍（主 CTA）
+BRAND_MID  = 0x38ABE0        # 中藍
+BRAND_LITE = 0x51CCE8        # 淺青藍
+ACCENT     = 0x48C5F4        # 亮天藍 accent（= PINK）
 
 # --- 核心數值：初始值與每秒變化量 ---
 GROWTH_MAX        = 100      # GrowthIndex 滿值 → 觸發正常結局

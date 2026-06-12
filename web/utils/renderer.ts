@@ -189,17 +189,18 @@ export class Renderer {
 
   // === 共用 UI（ui.py）===
 
-  // 對話泡泡（DialogBox.show）：白框 + 深底 + 朝下尾巴 + 文字。
+  // 對話泡泡（DialogBox.show）：天藍框線 + 深藍底 + 朝下尾巴 + 文字（Cover Corp 配色）。
   dialog(key: string) {
     const x = 12, y = 34, w = 296, h = 36, tailX = 160, TAIL = 12
-    this.fillRoundRect(x, y, w, h, 10, C.white)
-    this.fillRoundRect(x + 2, y + 2, w - 4, h - 4, 8, '#202030')
+    const BORDER = '#48C5F4', FILL = '#07304A'   // 與 device/ui.py DialogBox 對齊
+    this.fillRoundRect(x, y, w, h, 10, BORDER)
+    this.fillRoundRect(x + 2, y + 2, w - 4, h - 4, 8, FILL)
     const ty = y + h
     for (let i = 0; i < TAIL; i++) {
       const hw = TAIL - 2 - i
-      if (hw > 0) this.fillRect(tailX - hw, ty + i, hw * 2, 1, C.white)
+      if (hw > 0) this.fillRect(tailX - hw, ty + i, hw * 2, 1, BORDER)
       const hwi = TAIL - 5 - i
-      if (hwi > 0) this.fillRect(tailX - hwi, ty + i, hwi * 2, 1, '#202030')
+      if (hwi > 0) this.fillRect(tailX - hwi, ty + i, hwi * 2, 1, FILL)
     }
     this.text(STRINGS[key] ?? key, x + 12, y + 9, C.white, 16)
   }

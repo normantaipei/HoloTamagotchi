@@ -122,7 +122,7 @@ function renderEat(r: Renderer, opts: ActionOpts) {
 
 // --- sleep：sleeping.py ---
 const SLEEP = { x: 110, y: 80, w: 100, h: 70 }
-const SLEEP_BG = '#0A0814'
+const SLEEP_BG = '#06141E' // Cover 夜間深海軍藍（與 device/states/sleeping.py 對齊）
 function renderSleep(r: Renderer) {
   r.clear(SLEEP_BG)
   if (!r.hasImage('sleep')) r.text('Zzz...', 70, 56, C.white, 11)

@@ -7,16 +7,16 @@
 // 每個 key 的「佔位色塊規格 (color,label,w,h)」與裝置端一模一樣，
 // 這樣沒上傳圖片時，模擬器顯示的佔位畫面會跟真機完全相同。
 
-// --- 通用色票（device/config.py，0xRRGGBB → #RRGGBB）---
+// --- 通用色票（device/config.py，0xRRGGBB → #RRGGBB）— Cover Corp 風格 ---
 export const C = {
   white: '#FFFFFF',
   black: '#000000',
-  dark: '#3C3250',
+  dark: '#12303D',   // 冷調深板岩
   green: '#78E682',
   yellow: '#FFDC50',
   red: '#F05A5A',
-  pink: '#FF80C4',
-  cyan: '#78DCFF',
+  pink: '#48C5F4',   // 主互動 accent → Cover 亮天藍（沿用 pink 名）
+  cyan: '#51CCE8',   // Cover 淺青
 }
 
 // --- 角色色彩主題（character.py THEME）---

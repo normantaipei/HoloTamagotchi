@@ -67,22 +67,25 @@ class DialogBox:
         self.tail_x = tail_x
         self.clear_rect = (x, y, w, h + self._TAIL)
 
+    _BORDER = 0x48C5F4   # Cover 天藍框線（= config.ACCENT）
+    _FILL   = 0x07304A   # Cover 深藍底（白字可讀）
+
     def show(self, key):
         lcd = self.lcd
         x, y, w, h = self.rect
-        # 泡泡本體：外白框 + 內深色
-        lcd.fillRoundRect(x, y, w, h, 10, config.WHITE)
-        lcd.fillRoundRect(x + 2, y + 2, w - 4, h - 4, 8, 0x202030)
+        # 泡泡本體：外天藍框線 + 內深藍底（Cover Corp 配色）
+        lcd.fillRoundRect(x, y, w, h, 10, self._BORDER)
+        lcd.fillRoundRect(x + 2, y + 2, w - 4, h - 4, 8, self._FILL)
         # 朝下小尾巴：用一排遞減寬度的橫條堆出三角形（只靠 fillRect，跨韌體最穩）。
-        # 先畫較寬的白色當描邊，再疊較窄的深色當內側，做出帶白邊的尖角。
+        # 先畫較寬的天藍當框線，再疊較窄的深藍當內側，做出帶藍框的尖角。
         ty = y + h
         for i in range(self._TAIL):
-            hw = (self._TAIL - 2) - i            # 白色半寬：由寬遞減到尖
+            hw = (self._TAIL - 2) - i            # 框線半寬：由寬遞減到尖
             if hw > 0:
-                lcd.fillRect(self.tail_x - hw, ty + i, hw * 2, 1, config.WHITE)
-            hwi = (self._TAIL - 5) - i           # 深色半寬：比白色窄，留出白邊
+                lcd.fillRect(self.tail_x - hw, ty + i, hw * 2, 1, self._BORDER)
+            hwi = (self._TAIL - 5) - i           # 內側半寬：比框線窄，留出藍邊
             if hwi > 0:
-                lcd.fillRect(self.tail_x - hwi, ty + i, hwi * 2, 1, 0x202030)
+                lcd.fillRect(self.tail_x - hwi, ty + i, hwi * 2, 1, self._FILL)
         # 文字
         lcd.font(lcd.FONT_DejaVu18)
         lcd.print(i18n.get(key), x + 12, y + 9, config.WHITE)

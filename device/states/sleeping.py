@@ -14,7 +14,7 @@ import config
 from states.base import State
 
 SPR_X, SPR_Y, SPR_W, SPR_H = 110, 80, 100, 70
-BG = 0x0A0814
+BG = 0x06141E       # Cover 夜間深海軍藍
 
 
 class Sleeping(State):
