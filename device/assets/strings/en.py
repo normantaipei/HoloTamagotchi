@@ -8,4 +8,5 @@ STRINGS = {
     # 按鈕提示（螢幕底部，對齊三顆實體鍵）。左右移動用箭頭圖案，不走文字。
     "btn_menu":   "MENU",
     "btn_select": "OK",
+    "btn_eat":    "EAT",
 }

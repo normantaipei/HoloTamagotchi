@@ -13,7 +13,7 @@
 import config
 import i18n
 from states.base import State
-from ui import Menu, DialogBox
+from ui import Menu, DialogBox, ButtonHints
 
 # 隨機數（MicroPython 用 urandom；桌機測試 fallback 到 random）
 try:
@@ -32,18 +32,12 @@ CHEER_FRAMES = 60                       # 加油話語顯示幀數（60×50ms≈
 # 頭頂上方留給對話泡泡。尺寸較原始放大約 15%（80×74 → 92×85）。
 SPR_X, SPR_Y, SPR_W, SPR_H = 114, 80, 92, 85
 
-# 底部按鈕提示列：水平對齊三顆實體鍵（A 左 / B 中 / C 右）。
-# 文字走 i18n（保留多語言空間），左右移動則用箭頭圖案（語言無關）。
-HINT_CX = (53, 160, 267)                       # 三顆鍵的水平中心
-HINT_TOP = 216                                 # 提示文字頂端 y
-HINT_CLEAR = (0, 206, config.SCREEN_W, 34)     # 重畫前要清掉的範圍
-
-
 class NormalRoom(State):
     def on_enter(self):
         self.menu = Menu(self.game.lcd, MENU_ITEMS)
         # 對話泡泡：尾巴指向角色頭頂中心，浮在角色上方（用預設位置即可）。
         self.dialog = DialogBox(self.game.lcd, tail_x=SPR_X + SPR_W // 2)
+        self.hints = ButtonHints(self.game.lcd)
         self.menu_open = False
         self.event = None               # [kind, frames_left]，kind = "yawn" | "cheer"
         self.frame = 0
@@ -60,35 +54,13 @@ class NormalRoom(State):
 
     def _draw_hints(self, menu_open):
         """底部按鈕提示列。closed：右鍵=開選單；open：左右=箭頭、中間=確認。"""
-        g = self.game
-        self._bg_fill(*HINT_CLEAR)
-        g.lcd.font(g.lcd.FONT_DefaultSmall)
-        cy = HINT_TOP + 7
+        self._bg_fill(*self.hints.clear_rect)
         if menu_open:
-            self._hint_arrow(HINT_CX[0], cy, "left")             # A：上一個
-            self._hint_text(i18n.get("btn_select"), HINT_CX[1])  # B：確認
-            self._hint_arrow(HINT_CX[2], cy, "right")            # C：下一個
+            self.hints.draw(("arrow", "left"),               # A：上一個
+                            i18n.get("btn_select"),          # B：確認
+                            ("arrow", "right"))              # C：下一個
         else:
-            self._hint_text(i18n.get("btn_menu"), HINT_CX[2])    # C：開選單
-
-    def _hint_text(self, s, cx):
-        lcd = self.game.lcd
-        try:
-            w = lcd.textWidth(s)
-        except Exception:
-            w = len(s) * 7                       # 韌體無 textWidth 時的粗估
-        lcd.print(s, cx - w // 2, HINT_TOP, config.DARK)
-
-    def _hint_arrow(self, cx, cy, direction):
-        # 逐列 fillRect 疊出三角形（跨韌體最穩，與 DialogBox 尾巴同手法）。
-        lcd = self.game.lcd
-        hr, w = 8, 12                            # 半高、底寬
-        for dy in range(-hr, hr + 1):
-            span = (w * (hr - abs(dy))) // hr    # 該列寬度，往尖端收斂到 0
-            if span <= 0:
-                continue
-            x = cx - w // 2 if direction == "right" else cx - w // 2 + (w - span)
-            lcd.fillRect(x, cy + dy, span, 1, config.DARK)
+            self.hints.draw(c=i18n.get("btn_menu"))          # C：開選單
 
     def _bg_fill(self, x, y, w, h):
         # 用背景色清掉一塊（移除動態元件）。目前背景為純色塊；之後接背景圖再優化成重貼圖。

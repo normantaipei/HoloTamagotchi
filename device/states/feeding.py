@@ -7,8 +7,9 @@
 # 防閃爍：背景 / 提示只在進入時畫一次；選單只在「移動」時重畫；嚼食圖畫一次後計時。
 
 import config
+import i18n
 from states.base import State
-from ui import Menu
+from ui import Menu, ButtonHints
 
 FOOD_KEYS = ["food_0", "food_1", "food_2", "food_3", "food_4"]
 FOOD_LABELS = ["Cake", "Pudd", "Tart", "Soda", "Parf"]
@@ -26,8 +27,10 @@ class Feeding(State):
         g.assets.draw("bg_room", 0, 0)
         g.lcd.font(g.lcd.FONT_DejaVu18)
         g.lcd.print("Choose a sweet", 20, 18, config.WHITE)
-        g.lcd.font(g.lcd.FONT_DefaultSmall)
-        g.lcd.print("A/C move   B eat", 80, 210, config.DARK)
+        # 底部提示：A/C 左右箭頭切換、B 確認餵食（與普通房間選單同款）。
+        ButtonHints(g.lcd).draw(("arrow", "left"),
+                                i18n.get("btn_eat"),
+                                ("arrow", "right"))
 
     def update(self):
         if self.phase == "select":
