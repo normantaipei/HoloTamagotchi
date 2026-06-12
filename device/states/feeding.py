@@ -14,11 +14,11 @@ from ui import Menu, ButtonHints
 FOOD_KEYS = ["food_0", "food_1", "food_2", "food_3", "food_4"]
 FOOD_LABELS = ["Cake", "Pudd", "Tart", "Soda", "Parf"]
 
-# 嚼食圖位置 / 尺寸（與 draw 參數一致），用來推算嘴巴中心。
-EAT_X, EAT_Y, EAT_W, EAT_H = 120, 60, 80, 74
-MOUTH = (EAT_X + EAT_W // 2, EAT_Y + EAT_H * 3 // 5)   # 圓嘴中心 ≈ (160, 104)
-FOOD_SIZE = 50                                         # 食物起始邊長（同 manifest 預設）
-HOLD = (MOUTH[0], MOUTH[1] + 18)                       # 在嘴邊「拿著」的位置（嘴下方一點）
+# 嚼食圖位置 / 尺寸（與 draw 參數一致），用來推算嘴巴中心。角色統一 150×150 畫布。
+EAT_X, EAT_Y, EAT_W, EAT_H = 85, 34, 150, 150
+MOUTH = (EAT_X + EAT_W // 2, EAT_Y + EAT_H * 3 // 5)   # 圓嘴中心 ≈ (160, 124)
+FOOD_SIZE = 95                                         # 食物起始邊長（道具，與 manifest food 一致）
+HOLD = (MOUTH[0], MOUTH[1] + 34)                       # 在嘴邊「拿著」的位置（嘴下方一點）
 
 # 動畫節奏：食物直接出現在嘴邊，一口一口咬掉（每咬一口角色低頭咀嚼）。
 BITES = 4                                              # 咬幾口（食物分幾塊消失）
@@ -26,7 +26,7 @@ BITE_FRAMES = 9                                        # 每一口的幀數（�
 END_PAD = 6                                            # 吃完後的小停頓
 EAT_FRAMES = BITES * BITE_FRAMES + END_PAD             # ~2.1s
 
-CHEW_DIP = 4                                           # 咀嚼時角色上下點頭幅度（px）
+CHEW_DIP = 8                                           # 咀嚼時角色上下點頭幅度（px）
 CHAR_CLEAR = (EAT_X, EAT_Y, EAT_W, EAT_H + CHEW_DIP)   # 角色重畫前要清掉的範圍（含點頭）
 
 
@@ -62,7 +62,7 @@ class Feeding(State):
             return None
         idx = self.menu.selected()
         if idx != self._menu_idx:                 # 只在移動時重畫
-            g.assets.draw(FOOD_KEYS[idx], 135, 60)   # 預覽選中的甜點
+            g.assets.draw(FOOD_KEYS[idx], 112, 38)   # 預覽選中的甜點（放大後置中）
             self.menu.draw(150)
             self._menu_idx = idx
         return None

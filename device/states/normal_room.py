@@ -28,9 +28,9 @@ except ImportError:
 MENU_ITEMS = ["FEED", "PET"]
 EVENT_FRAMES = 24                       # 哈欠等事件動圖持續幀數（24×50ms≈1.2s）
 CHEER_FRAMES = 60                       # 加油話語顯示幀數（60×50ms≈3.0s）
-# 角色 / 事件圖位置：水平置中（114+92/2=160）、垂直置中（中點≈122≈螢幕中心120），
-# 頭頂上方留給對話泡泡。尺寸較原始放大約 15%（80×74 → 92×85）。
-SPR_X, SPR_Y, SPR_W, SPR_H = 114, 80, 92, 85
+# 角色 / 事件圖位置：統一 150×150 畫布，水平置中（85+150/2=160）。
+# 對話泡泡上移到 y=12、畫在最上層，只在出現時蓋住角色頭頂上緣（見 ui.DialogBox）。
+SPR_X, SPR_Y, SPR_W, SPR_H = 85, 38, 150, 150
 
 class NormalRoom(State):
     def on_enter(self):

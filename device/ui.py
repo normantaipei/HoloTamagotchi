@@ -61,7 +61,7 @@ class DialogBox:
 
     _TAIL = 12                       # 尾巴高度（px）
 
-    def __init__(self, lcd, x=12, y=34, w=296, h=36, tail_x=160):
+    def __init__(self, lcd, x=12, y=12, w=296, h=36, tail_x=160):
         self.lcd = lcd
         self.rect = (x, y, w, h)
         self.tail_x = tail_x

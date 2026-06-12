@@ -36,8 +36,8 @@ export interface ActionDef {
   render: (r: Renderer, opts: ActionOpts) => void
 }
 
-// === 角色位置常數（與各 state 對齊）===
-const ROOM = { x: 114, y: 80, w: 92, h: 85 } // normal_room / petting 角色框
+// === 角色位置常數（與各 state 對齊）。所有角色統一 150×150 畫布，只改擺位不改尺寸 ===
+const ROOM = { x: 85, y: 38, w: 150, h: 150 } // normal_room / petting 共用角色框
 
 // --- egg：init_state.py ---
 const ANIM_FRAMES = 24
@@ -45,12 +45,13 @@ function renderEgg(r: Renderer) {
   const t = Math.min(r.frame, ANIM_FRAMES)
   r.clear(C.black)
   const frac = t / ANIM_FRAMES
-  const w = Math.floor(60 + frac * 40)
-  const h = Math.floor(80 + frac * 50)
+  // 蛋維持正方形成長（90→150），最終填滿統一 150×150 畫布
+  const w = Math.floor(90 + frac * 60)
+  const h = w
   const cx = 160, cy = 120
   r.drawSprite('egg', cx - Math.floor(w / 2), cy - Math.floor(h / 2), w, h)
   if (!r.hasImage('egg')) {
-    r.text(`[ANIM: Egg cracking ${Math.floor(frac * 100)}%]`, 70, 215, C.white, 11)
+    r.text(`[ANIM: Egg cracking ${Math.floor(frac * 100)}%]`, 70, 222, C.white, 11)
   }
 }
 
@@ -85,15 +86,15 @@ function renderCheer(r: Renderer) {
 }
 
 // --- eat：feeding.py ---
-const EAT = { x: 120, y: 60, w: 80, h: 74 }
-const MOUTH = { x: 160, y: 104 } // EAT.x+40, EAT.y+74*3/5
-const HOLD = { x: 160, y: 122 } // 嘴下方 18px
-const FOOD_SIZE = 50
+const EAT = { x: 85, y: 34, w: 150, h: 150 }
+const MOUTH = { x: 160, y: 124 } // EAT.x+75, EAT.y+150*3/5
+const HOLD = { x: 160, y: 158 } // 嘴下方 34px
+const FOOD_SIZE = 95
 const BITES = 4
 const BITE_FRAMES = 9
 const END_PAD = 6
 const EAT_FRAMES = BITES * BITE_FRAMES + END_PAD // 42
-const CHEW_DIP = 4
+const CHEW_DIP = 8
 
 // 對應 feeding._frame_state：回傳 [食物中心x, y, 邊長, 角色點頭位移]
 function eatFrameState(t: number): [number, number, number, number] {
@@ -121,11 +122,11 @@ function renderEat(r: Renderer, opts: ActionOpts) {
 }
 
 // --- sleep：sleeping.py ---
-const SLEEP = { x: 110, y: 80, w: 100, h: 70 }
+const SLEEP = { x: 85, y: 50, w: 150, h: 150 }
 const SLEEP_BG = '#06141E' // Cover 夜間深海軍藍（與 device/states/sleeping.py 對齊）
 function renderSleep(r: Renderer) {
   r.clear(SLEEP_BG)
-  if (!r.hasImage('sleep')) r.text('Zzz...', 70, 56, C.white, 11)
+  if (!r.hasImage('sleep')) r.text('Zzz...', 50, 36, C.white, 11)
   const frame = Math.floor(r.frame / 10) % 2 // 2 幀輪播
   r.drawSprite('sleep', SLEEP.x, SLEEP.y + frame * 2, SLEEP.w, SLEEP.h)
   // 假設 IMU 可用
@@ -134,11 +135,11 @@ function renderSleep(r: Renderer) {
 
 // --- pet：petting.py（自動示範一段摸頭）---
 const REACT_FRAMES = 6
-const HAND = { y: 50, w: 34, h: 18, dx: 46 }
+const HAND = { y: 54, w: 44, h: 24, dx: 97 } // 角色填滿後，手改在頭左右兩側
 const HEAD_CX = ROOM.x + Math.floor(ROOM.w / 2) // 160
-const HEART = 12
-const HEART_Y = 96
-const HEART_X = [ROOM.x - 18, ROOM.x + ROOM.w + 6]
+const HEART = 20
+const HEART_Y = 64
+const HEART_X = [ROOM.x - 26, ROOM.x + ROOM.w + 6]
 const STROKE_PERIOD = 11 // 模擬：每 11 幀來回摸一下
 const PET_TARGET = PET_SUCCESS_STROKES // 親密度條滿格 = 成功門檻（與 device 對齊）
 function renderPet(r: Renderer) {
@@ -169,13 +170,13 @@ function renderPet(r: Renderer) {
 
   // 親密度條 / 時間條 / HUD
   const barW = 320 - 16
-  r.fillRect(8, 184, barW, 12, C.dark)
+  r.fillRect(8, 190, barW, 12, C.dark)
   const fill = Math.floor(barW * Math.min(1, strokes / PET_TARGET))
-  if (fill > 0) r.fillRect(8, 184, fill, 12, C.pink)
+  if (fill > 0) r.fillRect(8, 190, fill, 12, C.pink)
   const timeW = 320 - 40
   const tf = Math.floor((timeW * (160 - f)) / 160)
-  r.fillRect(20, 40, timeW, 6, C.dark)
-  if (tf > 0) r.fillRect(20, 40, tf, 6, C.green)
+  r.fillRect(20, 30, timeW, 6, C.dark)
+  if (tf > 0) r.fillRect(20, 30, tf, 6, C.green)
   r.fillRect(0, 212, 320, 24, THEME.bg)
   r.text(`Pets ${strokes}   Combo ${strokes}`, 8, 216, C.white, 16)
 }
@@ -184,7 +185,7 @@ function renderPet(r: Renderer) {
 function renderEnding(r: Renderer, opts: ActionOpts) {
   const e = ENDINGS.find((x) => x.id === (opts.ending || 'idol')) || ENDINGS[0]
   r.clear(C.black)
-  r.drawSprite(e.key, 90, 50) // 預設 140×150
+  r.drawSprite(e.key, 85, 36) // 統一 150×150
   r.text('ENDING: ' + e.title, 30, 14, C.yellow, 22)
   r.text(`Rhythm rate: ${e.rate}%`, 100, 196, C.white, 11)
   r.text('Press any button to restart', 50, 210, C.white, 11)
@@ -195,9 +196,9 @@ function renderResult(r: Renderer, opts: ActionOpts) {
   const g = GRADES.find((x) => x.id === (opts.grade || 'success')) || GRADES[0]
   const win = g.id === 'success'
   r.clear(C.black)
-  r.drawSprite(g.emo, 115, 56) // 預設 90×100
+  r.drawSprite(g.emo, 85, 36) // 統一 150×150
   r.text(g.title, 95, 18, win ? C.yellow : C.red, 22)
-  r.text(`Pets ${g.pets} / ${PET_SUCCESS_STROKES}`, 80, 172, C.white, 16)
+  r.text(`Pets ${g.pets} / ${PET_SUCCESS_STROKES}`, 80, 190, C.white, 16)
   r.text(`Max combo ${g.pets}   B: back`, 70, 210, C.dark, 11)
 }
 

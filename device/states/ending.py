@@ -29,7 +29,7 @@ class Ending(State):
     def update(self):
         g = self.game
         if not self._drawn:
-            g.assets.draw(self.key, 90, 50)
+            g.assets.draw(self.key, 85, 36)
             g.lcd.font(g.lcd.FONT_DejaVu24)
             g.lcd.print("ENDING: " + self.title, 30, 14, config.YELLOW)
             g.lcd.font(g.lcd.FONT_DefaultSmall)

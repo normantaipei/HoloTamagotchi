@@ -10,7 +10,7 @@ import config
 from states.base import State
 
 ANIM_FRAMES = 24
-MAXW, MAXH = 110, 140          # 蛋最大尺寸，用來界定每幀要清掉的區塊
+MAXW, MAXH = 150, 150          # 蛋最大尺寸（統一 150×150 畫布），界定每幀要清掉的區塊
 
 
 class InitState(State):
@@ -23,8 +23,8 @@ class InitState(State):
     def update(self):
         g = self.game
         frac = self.t / float(ANIM_FRAMES)
-        w = int(60 + frac * 40)
-        h = int(80 + frac * 50)
+        # 蛋維持正方形成長（90→150），最終填滿統一 150×150 畫布
+        w = h = int(90 + frac * 60)
         # 只清蛋的最大包圍框（置中），不每幀清整片螢幕
         cx, cy = config.SCREEN_W // 2, config.SCREEN_H // 2
         g.lcd.fillRect(cx - MAXW // 2, cy - MAXH // 2, MAXW, MAXH, config.BLACK)
@@ -32,8 +32,8 @@ class InitState(State):
         # 佔位進度字：美術放好蛋的動畫圖後自動關掉，可把破殼效果直接畫進素材裡。
         if not g.assets.has_image("egg"):
             g.lcd.font(g.lcd.FONT_DefaultSmall)
-            g.lcd.fillRect(60, 213, 200, 14, config.BLACK)
-            g.lcd.print("[ANIM: Egg cracking %d%%]" % int(frac * 100), 70, 215, config.WHITE)
+            g.lcd.fillRect(60, 220, 200, 16, config.BLACK)
+            g.lcd.print("[ANIM: Egg cracking %d%%]" % int(frac * 100), 70, 222, config.WHITE)
         self.t += 1
         if self.t > ANIM_FRAMES:
             return config.STATE_NORMAL_ROOM

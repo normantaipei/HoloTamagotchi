@@ -45,32 +45,36 @@ export interface SpriteSpec {
 }
 
 // 把 0xRRGGBB 數字轉成 css；這裡直接寫好十六進位，與 character.py 對齊。
+// 【統一畫布】所有「角色」一律 150×150 正方形（與 device character.py 對齊）；
+// 食物 95×95、背景 320×240 各自一套。裝置端貼圖不縮放，畫布大小＝上機顯示大小。
+const CHAR_W = 150
+const CHAR_H = 150
 export const SPRITES: Record<string, SpriteSpec> = {
   // --- 背景 ---
   bg_room: { key: 'bg_room', color: '#2A1020', label: 'BG: Normal Room', w: 320, h: 240, folder: 'backgrounds', suggested: 'room.jpg', category: 'background', desc: '普通房間背景（待機 / 餵食 / 摸頭都在這）' },
   bg_game: { key: 'bg_game', color: '#0C1828', label: 'BG: Game Room', w: 320, h: 240, folder: 'backgrounds', suggested: 'game_room.jpg', category: 'background', desc: '遊戲房間背景（唱跳用）' },
-  // --- 動作 / 待機 ---
-  egg: { key: 'egg', color: '#F0E6C8', label: 'Egg', w: 70, h: 90, folder: 'anim', suggested: 'egg.jpg', category: 'anim', desc: '蛋（破殼初始化動畫，會隨進度放大）' },
-  idle: { key: 'idle', color: '#F0405A', label: 'Marine idle', w: 80, h: 74, folder: 'anim', suggested: 'idle_00.jpg', category: 'anim', desc: '待機（最常出現，是門面）' },
-  yawn: { key: 'yawn', color: '#C0506A', label: 'ANIM: Yawn', w: 80, h: 74, folder: 'anim', suggested: 'yawn.jpg', category: 'anim', desc: '打哈欠（疲勞高時隨機觸發）' },
-  cheer: { key: 'cheer', color: '#FF6080', label: 'ANIM: Cheer', w: 80, h: 74, folder: 'anim', suggested: 'cheer.jpg', category: 'anim', desc: '加油（隨機觸發 + 對話泡泡）' },
-  pet: { key: 'pet', color: '#FF7090', label: 'ANIM: Pet', w: 92, h: 85, folder: 'anim', suggested: 'pet.jpg', category: 'anim', desc: '摸頭時的開心表情' },
-  eat: { key: 'eat', color: '#F07090', label: 'ANIM: Eat', w: 80, h: 74, folder: 'anim', suggested: 'eat.jpg', category: 'anim', desc: '嚼食（餵食時一口一口咬）' },
-  sleep: { key: 'sleep', color: '#405080', label: 'ANIM: Sleep', w: 100, h: 70, folder: 'anim', suggested: 'sleep.jpg', category: 'anim', desc: '蓋被子睡覺（2 幀呼吸輪播）' },
-  // --- 結局圖 ---
-  end_idol: { key: 'end_idol', color: '#FFD24A', label: 'END: Idol', w: 140, h: 150, folder: 'portraits', suggested: 'idol.jpg', category: 'ending', desc: '偶像結局（音遊率 > 90%）' },
-  end_office: { key: 'end_office', color: '#6A86C0', label: 'END: Office', w: 140, h: 150, folder: 'portraits', suggested: 'office.jpg', category: 'ending', desc: '上班族結局（音遊率 30~90%）' },
-  end_pirate: { key: 'end_pirate', color: '#9A3A3A', label: 'END: Pirate', w: 140, h: 150, folder: 'portraits', suggested: 'pirate.jpg', category: 'ending', desc: '海賊結局（音遊率 < 30%）' },
-  end_runaway: { key: 'end_runaway', color: '#404048', label: 'END: Run away', w: 140, h: 150, folder: 'portraits', suggested: 'runaway.jpg', category: 'ending', desc: '離家出走（壞結局，飽食度歸零）' },
-  // --- 摸頭結算情緒圖（成功 / 失敗）---
-  emo_success: { key: 'emo_success', color: '#FFD24A', label: 'EMO: Success', w: 90, h: 100, folder: 'portraits', suggested: 'emo_success.jpg', category: 'emotion', desc: '成功（時間內摸滿親密度條）' },
-  emo_fail: { key: 'emo_fail', color: '#9A6A6A', label: 'EMO: Fail', w: 90, h: 100, folder: 'portraits', suggested: 'emo_fail.jpg', category: 'emotion', desc: '失敗（時間到沒摸滿）' },
+  // --- 動作 / 待機（皆 150×150 統一畫布）---
+  egg: { key: 'egg', color: '#F0E6C8', label: 'Egg', w: CHAR_W, h: CHAR_H, folder: 'anim', suggested: 'egg.jpg', category: 'anim', desc: '蛋（破殼初始化動畫，會隨進度放大）' },
+  idle: { key: 'idle', color: '#F0405A', label: 'Marine idle', w: CHAR_W, h: CHAR_H, folder: 'anim', suggested: 'idle_00.jpg', category: 'anim', desc: '待機（最常出現，是門面）' },
+  yawn: { key: 'yawn', color: '#C0506A', label: 'ANIM: Yawn', w: CHAR_W, h: CHAR_H, folder: 'anim', suggested: 'yawn.jpg', category: 'anim', desc: '打哈欠（疲勞高時隨機觸發）' },
+  cheer: { key: 'cheer', color: '#FF6080', label: 'ANIM: Cheer', w: CHAR_W, h: CHAR_H, folder: 'anim', suggested: 'cheer.jpg', category: 'anim', desc: '加油（隨機觸發 + 對話泡泡）' },
+  pet: { key: 'pet', color: '#FF7090', label: 'ANIM: Pet', w: CHAR_W, h: CHAR_H, folder: 'anim', suggested: 'pet.jpg', category: 'anim', desc: '摸頭時的開心表情' },
+  eat: { key: 'eat', color: '#F07090', label: 'ANIM: Eat', w: CHAR_W, h: CHAR_H, folder: 'anim', suggested: 'eat.jpg', category: 'anim', desc: '嚼食（餵食時一口一口咬）' },
+  sleep: { key: 'sleep', color: '#405080', label: 'ANIM: Sleep', w: CHAR_W, h: CHAR_H, folder: 'anim', suggested: 'sleep.jpg', category: 'anim', desc: '蓋被子睡覺（2 幀呼吸輪播）' },
+  // --- 結局圖（皆 150×150 統一畫布）---
+  end_idol: { key: 'end_idol', color: '#FFD24A', label: 'END: Idol', w: CHAR_W, h: CHAR_H, folder: 'portraits', suggested: 'idol.jpg', category: 'ending', desc: '偶像結局（音遊率 > 90%）' },
+  end_office: { key: 'end_office', color: '#6A86C0', label: 'END: Office', w: CHAR_W, h: CHAR_H, folder: 'portraits', suggested: 'office.jpg', category: 'ending', desc: '上班族結局（音遊率 30~90%）' },
+  end_pirate: { key: 'end_pirate', color: '#9A3A3A', label: 'END: Pirate', w: CHAR_W, h: CHAR_H, folder: 'portraits', suggested: 'pirate.jpg', category: 'ending', desc: '海賊結局（音遊率 < 30%）' },
+  end_runaway: { key: 'end_runaway', color: '#404048', label: 'END: Run away', w: CHAR_W, h: CHAR_H, folder: 'portraits', suggested: 'runaway.jpg', category: 'ending', desc: '離家出走（壞結局，飽食度歸零）' },
+  // --- 摸頭結算情緒圖（成功 / 失敗，皆 150×150 統一畫布）---
+  emo_success: { key: 'emo_success', color: '#FFD24A', label: 'EMO: Success', w: CHAR_W, h: CHAR_H, folder: 'portraits', suggested: 'emo_success.jpg', category: 'emotion', desc: '成功（時間內摸滿親密度條）' },
+  emo_fail: { key: 'emo_fail', color: '#9A6A6A', label: 'EMO: Fail', w: CHAR_W, h: CHAR_H, folder: 'portraits', suggested: 'emo_fail.jpg', category: 'emotion', desc: '失敗（時間到沒摸滿）' },
   // --- 食物 / 甜點 ---
-  food_0: { key: 'food_0', color: '#F0A0B0', label: 'Cake', w: 50, h: 50, folder: 'food', suggested: 'cake.jpg', category: 'food', desc: '蛋糕' },
-  food_1: { key: 'food_1', color: '#C08050', label: 'Pudding', w: 50, h: 50, folder: 'food', suggested: 'pudding.jpg', category: 'food', desc: '布丁' },
-  food_2: { key: 'food_2', color: '#F0D060', label: 'Tart', w: 50, h: 50, folder: 'food', suggested: 'tart.jpg', category: 'food', desc: '塔' },
-  food_3: { key: 'food_3', color: '#B0E0F0', label: 'Soda', w: 50, h: 50, folder: 'food', suggested: 'soda.jpg', category: 'food', desc: '蘇打' },
-  food_4: { key: 'food_4', color: '#E07070', label: 'Parfait', w: 50, h: 50, folder: 'food', suggested: 'parfait.jpg', category: 'food', desc: '百匯' },
+  food_0: { key: 'food_0', color: '#F0A0B0', label: 'Cake', w: 95, h: 95, folder: 'food', suggested: 'cake.jpg', category: 'food', desc: '蛋糕' },
+  food_1: { key: 'food_1', color: '#C08050', label: 'Pudding', w: 95, h: 95, folder: 'food', suggested: 'pudding.jpg', category: 'food', desc: '布丁' },
+  food_2: { key: 'food_2', color: '#F0D060', label: 'Tart', w: 95, h: 95, folder: 'food', suggested: 'tart.jpg', category: 'food', desc: '塔' },
+  food_3: { key: 'food_3', color: '#B0E0F0', label: 'Soda', w: 95, h: 95, folder: 'food', suggested: 'soda.jpg', category: 'food', desc: '蘇打' },
+  food_4: { key: 'food_4', color: '#E07070', label: 'Parfait', w: 95, h: 95, folder: 'food', suggested: 'parfait.jpg', category: 'food', desc: '百匯' },
 }
 
 // 給上傳面板分組用。

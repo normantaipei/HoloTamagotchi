@@ -13,7 +13,7 @@
 import config
 from states.base import State
 
-SPR_X, SPR_Y, SPR_W, SPR_H = 110, 80, 100, 70
+SPR_X, SPR_Y, SPR_W, SPR_H = 85, 50, 150, 150   # 角色統一 150×150 畫布
 BG = 0x06141E       # Cover 夜間深海軍藍
 
 
@@ -29,7 +29,7 @@ class Sleeping(State):
         g.lcd.font(g.lcd.FONT_DefaultSmall)
         # 佔位裝飾：美術放好睡覺圖後自動關掉，可把 Zzz 直接畫進素材裡。
         if not g.assets.has_image("sleep"):
-            g.lcd.print("Zzz...", 70, 56, config.WHITE)
+            g.lcd.print("Zzz...", 50, 36, config.WHITE)
         hint = "Shake or C: wake up" if g.imu is not None else "C: wake up"
         g.lcd.print(hint, 8, 210, config.DARK)
 

@@ -191,7 +191,7 @@ export class Renderer {
 
   // 對話泡泡（DialogBox.show）：天藍框線 + 深藍底 + 朝下尾巴 + 文字（Cover Corp 配色）。
   dialog(key: string) {
-    const x = 12, y = 34, w = 296, h = 36, tailX = 160, TAIL = 12
+    const x = 12, y = 12, w = 296, h = 36, tailX = 160, TAIL = 12
     const BORDER = '#48C5F4', FILL = '#07304A'   // 與 device/ui.py DialogBox 對齊
     this.fillRoundRect(x, y, w, h, 10, BORDER)
     this.fillRoundRect(x + 2, y + 2, w - 4, h - 4, 8, FILL)

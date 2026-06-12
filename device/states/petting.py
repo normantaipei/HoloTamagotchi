@@ -13,18 +13,19 @@
 import config
 from states.base import State
 
-# 角色位置（與普通房間一致，置中、頭頂上方留白給「摸頭手」）。
-SPR_X, SPR_Y, SPR_W, SPR_H = 114, 80, 92, 85
+# 角色位置：統一 150×150 畫布，置中。摸頭畫面上下有 HUD（標題 / 時間條 / 親密度條 / HUD 文字），
+# 為了容下 150 的角色，時間條上移到 y=30、親密度條下移到 y=190，角色佔 38..188。
+SPR_X, SPR_Y, SPR_W, SPR_H = 85, 38, 150, 150
 HEAD_CX = SPR_X + SPR_W // 2          # 頭中心 x ≈ 160
 
-# 摸頭手：在頭頂上方左右擺動（A→左、C→右）。
-HAND_Y, HAND_W, HAND_H = 50, 34, 18
-HAND_DX = 46                          # 手相對頭中心的水平位移
+# 摸頭手：因角色填滿、頭頂無留白，改在「頭的左右兩側」擺動（A→左、C→右）。
+HAND_Y, HAND_W, HAND_H = 54, 44, 24
+HAND_DX = 97                          # 手相對頭中心的水平位移（落在角色框外側）
 
-# 被摸時頭兩側冒出的愛心。
-HEART = 12
-HEART_Y = 96
-HEART_X = (SPR_X - 18, SPR_X + SPR_W + 6)
+# 被摸時頭兩側冒出的愛心（放在頭左右兩側，不蓋到角色）。
+HEART = 20
+HEART_Y = 64
+HEART_X = (SPR_X - 26, SPR_X + SPR_W + 6)
 
 SESSION_SEC  = 8                      # 一次互動時長（秒）
 REACT_FRAMES = 6                      # 每摸一下角色露開心表情 / 愛心的幀數
@@ -144,9 +145,9 @@ class Petting(State):
         if f == self._bar_fill:
             return
         lcd = self.game.lcd
-        lcd.fillRect(8, 184, w, 12, config.DARK)
+        lcd.fillRect(8, 190, w, 12, config.DARK)
         if f > 0:
-            lcd.fillRect(8, 184, f, 12, config.PINK)
+            lcd.fillRect(8, 190, f, 12, config.PINK)
         self._bar_fill = f
 
     def _draw_time(self):
@@ -155,9 +156,9 @@ class Petting(State):
         if f == self._time_fill:
             return
         lcd = self.game.lcd
-        lcd.fillRect(20, 40, w, 6, config.DARK)
+        lcd.fillRect(20, 30, w, 6, config.DARK)
         if f > 0:
-            lcd.fillRect(20, 40, f, 6, config.GREEN)
+            lcd.fillRect(20, 30, f, 6, config.GREEN)
         self._time_fill = f
 
     # --- 結算畫面（只畫一次）：成功 / 失敗兩種 ---
@@ -168,11 +169,11 @@ class Petting(State):
             lcd.clear(config.BLACK)
             win = (self.result == "success")
             emo = "emo_success" if win else "emo_fail"
-            g.assets.draw(emo, 115, 56)
+            g.assets.draw(emo, 85, 36)
             lcd.font(lcd.FONT_DejaVu24)
             lcd.print("SUCCESS!" if win else "FAILED...", 95, 18,
                       config.YELLOW if win else config.RED)
-            lcd.print("Pets %d / %d" % (self.strokes, config.PET_SUCCESS_STROKES), 80, 172, config.WHITE)
+            lcd.print("Pets %d / %d" % (self.strokes, config.PET_SUCCESS_STROKES), 80, 190, config.WHITE)
             lcd.font(lcd.FONT_DefaultSmall)
             lcd.print("Max combo %d   B: back" % self.max_combo, 70, 210, config.DARK)
             self._drawn = True
