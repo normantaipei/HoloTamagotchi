@@ -52,7 +52,7 @@ class NormalRoom(State):
         g.lcd.font(g.lcd.FONT_DejaVu24)
         g.lcd.print(g.assets.char.NAME[:14], 8, 6, config.WHITE)
         g.lcd.font(g.lcd.FONT_DefaultSmall)
-        g.lcd.print("B: Menu", 8, 210, config.DARK)
+        g.lcd.print("C: Menu", 8, 210, config.DARK)
 
     def _bg_fill(self, x, y, w, h):
         # 用背景色清掉一塊（移除動態元件）。目前背景為純色塊；之後接背景圖再優化成重貼圖。
@@ -118,7 +118,7 @@ class NormalRoom(State):
 
     def _handle_buttons(self, pa, pb, pc):
         if not self.menu_open:
-            if pb:
+            if pc:
                 self.menu_open = True
         else:
             if pa:
