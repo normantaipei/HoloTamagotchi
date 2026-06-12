@@ -56,8 +56,6 @@ class NormalRoom(State):
     def _draw_static(self):
         g = self.game
         g.assets.draw("bg_room", 0, 0)
-        g.lcd.font(g.lcd.FONT_DejaVu24)
-        g.lcd.print(g.assets.char.NAME[:14], 8, 6, config.WHITE)
         self._draw_hints(False)
 
     def _draw_hints(self, menu_open):
