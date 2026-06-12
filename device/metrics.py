@@ -47,11 +47,11 @@ class Metrics:
         self.life = clamp(self.life + amount, -20, 100)
         self.total_interactions += 1
 
-    def record_rhythm(self, grade):
-        """音遊一局結束後記錄一次。grade 為 'S'/'A'/'C'/'F'。"""
+    def record_rhythm(self, success):
+        """摸頭遊戲一局結束後記錄一次。success 為 True（成功）/ False（失敗）。"""
         self.rhythm_plays += 1
         self.total_interactions += 1
-        if grade in ("S", "A"):
+        if success:
             self.rhythm_sa += 1
 
     # --- RhythmGameRate（音遊互動率，%）---

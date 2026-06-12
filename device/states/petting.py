@@ -2,11 +2,10 @@
 #
 # 玩法：在頭頂上方有一隻「摸頭手」，左右交替按 A（往左摸）/ C（往右摸）來撫摸。
 #   只有「方向和上一下不同」才算有效一摸（模擬來回撫摸的節奏）；同一邊連按不計、
-#   並會斷 Combo。限時一段時間，結束依有效摸數給評級 S/A/C/F。
-#   被摸時角色露出開心表情、頭兩側冒出愛心。
+#   並會斷 Combo。限時一段時間內，把親密度條「摸滿」就成功；時間到還沒滿 → 失敗。
+#   結果只有「成功 / 失敗」兩種。被摸時角色露出開心表情、頭兩側冒出愛心。
 #
-# 結算：沿用 metrics.record_rhythm(grade) 更新 RhythmGameRate（結局分支來源），
-#   暫不更動 metrics 的命名，等之後整體重構互動率系統再一起處理。
+# 結算：以成功與否呼叫 metrics.record_rhythm(success) 更新 RhythmGameRate（結局分支來源）。
 #
 # 防閃爍（與其它狀態一致）：背景 / 標題只畫一次；摸頭手只在方向改變時重畫，
 #   角色只在表情 key 改變時重畫，親密度條 / 時間條 / HUD 只在數字變動時重畫。
@@ -30,8 +29,7 @@ HEART_X = (SPR_X - 18, SPR_X + SPR_W + 6)
 SESSION_SEC  = 8                      # 一次互動時長（秒）
 REACT_FRAMES = 6                      # 每摸一下角色露開心表情 / 愛心的幀數
 
-# 評級門檻（有效摸頭次數，由高到低）；都不到 → F。S 門檻同時當親密度條滿格。
-GRADE = [(28, "S"), (18, "A"), (8, "C")]
+# 成功門檻（有效摸頭次數）＝親密度條滿格。達標即成功、時間到沒達標即失敗。見 config。
 
 
 class Petting(State):
@@ -124,8 +122,12 @@ class Petting(State):
             self._hud = hud
 
         self.t += 1
-        if self.t >= self.frames:
-            self.result = self._grade()
+        # 摸滿親密度條 → 成功（可在時間內提前達成）；時間到還沒滿 → 失敗。
+        if self.strokes >= config.PET_SUCCESS_STROKES:
+            self.result = "success"
+            self._drawn = False
+        elif self.t >= self.frames:
+            self.result = "fail"
             self._drawn = False
         return None
 
@@ -136,7 +138,7 @@ class Petting(State):
         self.game.lcd.fillRoundRect(x, HAND_Y, HAND_W, HAND_H, 6, config.PINK)
 
     def _draw_bar(self):
-        target = GRADE[0][0]
+        target = config.PET_SUCCESS_STROKES
         w = config.SCREEN_W - 16
         f = int(w * min(1.0, self.strokes / float(target)))
         if f == self._bar_fill:
@@ -158,27 +160,23 @@ class Petting(State):
             lcd.fillRect(20, 40, f, 6, config.GREEN)
         self._time_fill = f
 
-    def _grade(self):
-        for need, grade in GRADE:
-            if self.strokes >= need:
-                return grade
-        return "F"
-
-    # --- 結算畫面（只畫一次）---
+    # --- 結算畫面（只畫一次）：成功 / 失敗兩種 ---
     def _result_screen(self):
         g = self.game
         lcd = g.lcd
         if not self._drawn:
             lcd.clear(config.BLACK)
-            emo = {"S": "emo_s", "A": "emo_a", "C": "emo_c", "F": "emo_f"}[self.result]
+            win = (self.result == "success")
+            emo = "emo_success" if win else "emo_fail"
             g.assets.draw(emo, 115, 56)
             lcd.font(lcd.FONT_DejaVu24)
-            lcd.print("RESULT: %s" % self.result, 85, 18, config.YELLOW)
-            lcd.print("Pets %d" % self.strokes, 100, 172, config.WHITE)
+            lcd.print("SUCCESS!" if win else "FAILED...", 95, 18,
+                      config.YELLOW if win else config.RED)
+            lcd.print("Pets %d / %d" % (self.strokes, config.PET_SUCCESS_STROKES), 80, 172, config.WHITE)
             lcd.font(lcd.FONT_DefaultSmall)
             lcd.print("Max combo %d   B: back" % self.max_combo, 70, 210, config.DARK)
             self._drawn = True
         if g.btnB.wasPressed():
-            g.metrics.record_rhythm(self.result)   # 更新 RhythmGameRate 來源
+            g.metrics.record_rhythm(self.result == "success")   # 更新 RhythmGameRate 來源
             return config.STATE_NORMAL_ROOM
         return None

@@ -19,8 +19,8 @@ assets/
    └─ marine/                # 角色：寶鐘瑪琳（複製這層即可新增角色）
       ├─ character.py        #   manifest：色彩主題 / 佔位規格 / 圖片對應 / 對話
       ├─ backgrounds/        #   背景圖（bg_room, bg_game）320×240
-      ├─ anim/               #   動作動圖幀（idle, yawn, cheer, eat, sleep, dance）
-      ├─ portraits/          #   結局圖 + 音遊情緒圖（end_*, emo_*）
+      ├─ anim/               #   動作動圖幀（idle, yawn, cheer, eat, sleep）
+      ├─ portraits/          #   結局圖 + 摸頭結算情緒圖（end_*, emo_success/emo_fail）
       └─ food/               #   甜點 5 種（food_0 ~ food_4）50×50
 ```
 
@@ -46,9 +46,8 @@ assets/
 | `idle` | anim | 待機 | ~80×74 |
 | `yawn` / `cheer` / `eat` | anim | 打哈欠 / 加油 / 嚼食 | ~80×74 |
 | `sleep` | anim | 蓋被子睡覺（2 幀） | ~100×70 |
-| `dance` | anim | 唱跳（2~3 幀循環） | ~60×36 |
 | `end_idol` / `end_office` / `end_pirate` / `end_runaway` | portraits | 4 種結局圖 | ~140×150 |
-| `emo_s` / `emo_a` / `emo_c` / `emo_f` | portraits | 音遊結算 4 張情緒圖 | ~90×100 |
+| `emo_success` / `emo_fail` | portraits | 摸頭結算情緒圖（成功 / 失敗） | ~90×100 |
 | `food_0` ~ `food_4` | food | 甜點 5 種 | 50×50 |
 
 > 多幀動畫目前骨架是「同一張佔位輪播」。接圖時可在 manifest 與對應 state 擴成

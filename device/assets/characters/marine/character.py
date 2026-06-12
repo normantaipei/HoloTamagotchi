@@ -29,7 +29,6 @@ SPRITES = {
     "pet":          (0xFF7090, "ANIM: Pet",      92,  85),
     "eat":          (0xF07090, "ANIM: Eat",      80,  74),
     "sleep":        (0x405080, "ANIM: Sleep",   100,  70),
-    "dance":        (0xFF80A0, "ANIM: Sing",     60,  36),
     # 背景
     "bg_room":      (0x2A1020, "BG: Normal Room", 320, 240),
     "bg_game":      (0x0C1828, "BG: Game Room",   320, 240),
@@ -38,11 +37,9 @@ SPRITES = {
     "end_office":   (0x6A86C0, "END: Office",    140, 150),
     "end_pirate":   (0x9A3A3A, "END: Pirate",    140, 150),
     "end_runaway":  (0x404048, "END: Run away",  140, 150),
-    # 音遊結算情緒圖（4 張）
-    "emo_s":        (0xFFD24A, "EMO: S",          90, 100),
-    "emo_a":        (0x80E0A0, "EMO: A",          90, 100),
-    "emo_c":        (0xC0C070, "EMO: C",          90, 100),
-    "emo_f":        (0x9A6A6A, "EMO: F",          90, 100),
+    # 摸頭遊戲結算情緒圖（成功 / 失敗 2 張）
+    "emo_success":  (0xFFD24A, "EMO: Success",    90, 100),
+    "emo_fail":     (0x9A6A6A, "EMO: Fail",       90, 100),
     # 食物 / 甜點（5 種）
     "food_0":       (0xF0A0B0, "Cake",     50, 50),
     "food_1":       (0xC08050, "Pudding",  50, 50),

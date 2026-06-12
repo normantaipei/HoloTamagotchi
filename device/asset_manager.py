@@ -37,15 +37,12 @@ PET_EXPR = {
     "pet":         "happy",
     "eat":         "eating",
     "sleep":       "sleepy",
-    "dance":       "excited",
     "end_idol":    "excited",
     "end_office":  "neutral",
     "end_pirate":  "happy",
     "end_runaway": "sad",
-    "emo_s":       "excited",
-    "emo_a":       "happy",
-    "emo_c":       "neutral",
-    "emo_f":       "sad",
+    "emo_success": "excited",
+    "emo_fail":    "sad",
 }
 # ──────────────────────────────────────────────────────────────────────────
 
