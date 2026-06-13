@@ -9,3 +9,4 @@ dist
 
 # demo 用生成的角色素材（由 scripts/gen-demo-assets.mjs 產生，不入庫）
 demo-assets/
+holo-art-demo.json
