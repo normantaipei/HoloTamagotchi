@@ -88,7 +88,8 @@ ensure_node() {
 
   # 3a. Debian/Ubuntu：走 NodeSource（最穩）
   if have apt-get; then
-    if curl -fsSL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | $SUDO -E bash -; then
+    # 以 root 直跑時 $SUDO 為空；只有真的用 sudo 時才帶 -E（保留環境變數）
+    if curl -fsSL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | ${SUDO:+$SUDO -E} bash -; then
       $SUDO apt-get install -y nodejs && { ok "Node 安裝完成：$(node -v)"; return; }
     fi
     warn "NodeSource 安裝失敗，改試 nvm…"
