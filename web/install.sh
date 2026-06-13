@@ -144,6 +144,8 @@ fetch_web() {
 # ---- 6. 安裝相依 + build ----------------------------------------------------
 build_app() {
   cd "$INSTALL_DIR/web"
+  # 非互動環境（curl | bash 無 TTY）：關掉 Nuxt 遙測詢問，否則 build 會卡在問句而失敗
+  export CI=1 NUXT_TELEMETRY_DISABLED=1 npm_config_yes=true
   log "安裝 npm 相依（這步最久，請耐心等）…"
   if [ -f package-lock.json ]; then npm ci; else npm install; fi
   ok "相依安裝完成"
