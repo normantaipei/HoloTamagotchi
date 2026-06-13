@@ -3,23 +3,29 @@
      每張卡片可：點圖換圖（Frame 上傳）、左右移動排序、刪除。
      末端「+」新增一或多幀（多選依檔名排序）。 -->
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { SPRITES } from '~/data/manifest'
-import { useAssetStore } from '~/composables/useAssetStore'
+import { useAssetStore, MAX_FILE_BYTES, MAX_TOTAL_BYTES, formatBytes } from '~/composables/useAssetStore'
 
 const props = defineProps<{ partKey: string }>()
 const store = useAssetStore()
 const spec = computed(() => SPRITES[props.partKey])
 const frames = computed(() => store.getFrames(props.partKey))
 
+// 被擋下的上傳訊息（超過單檔 / 總量上限）。
+const rejected = ref<string[]>([])
+
 async function onAdd(e: Event) {
   const input = e.target as HTMLInputElement
-  if (input.files?.length) await store.addFiles(props.partKey, Array.from(input.files))
+  if (input.files?.length) rejected.value = await store.addFiles(props.partKey, Array.from(input.files))
   input.value = ''
 }
 async function onReplace(idx: number, e: Event) {
   const input = e.target as HTMLInputElement
-  if (input.files?.[0]) await store.replaceFrame(props.partKey, idx, input.files[0])
+  if (input.files?.[0]) {
+    const reason = await store.replaceFrame(props.partKey, idx, input.files[0])
+    rejected.value = reason ? [reason] : []
+  }
   input.value = ''
 }
 </script>
@@ -31,7 +37,13 @@ async function onReplace(idx: number, e: Event) {
         <span class="key">{{ partKey }}</span>
         <span class="desc">{{ spec.desc }}</span>
       </div>
-      <div class="ed-meta">建議 Suggested {{ spec.w }}×{{ spec.h }} · {{ spec.folder }}/{{ spec.suggested }} · {{ frames.length }} 幀 frames</div>
+      <div class="ed-meta">建議 Suggested {{ spec.w }}×{{ spec.h }} · {{ spec.folder }}/{{ spec.suggested }} · {{ frames.length }} 幀 frames · 單檔 ≤ {{ formatBytes(MAX_FILE_BYTES) }}</div>
+    </div>
+
+    <div v-if="rejected.length" class="reject" role="alert">
+      <button class="reject-x" title="關閉 Dismiss" @click="rejected = []">✕</button>
+      <div class="reject-head">以下檔案未上傳 Skipped files（總量上限 Total limit {{ formatBytes(MAX_TOTAL_BYTES) }}）</div>
+      <div v-for="(msg, i) in rejected" :key="i" class="reject-row">{{ msg }}</div>
     </div>
 
     <div class="strip">
@@ -115,6 +127,12 @@ async function onReplace(idx: number, e: Event) {
 .plus { font-size: 38px; color: #F0405A; line-height: 1; }
 .add-label { font-size: 12px; color: #d8d2e4; }
 .add-sub { font-size: 10px; color: #6f667e; }
+
+.reject { position: relative; background: #2a1620; border: 1px solid #6a2c3e; border-radius: 10px; padding: 10px 30px 10px 12px; display: flex; flex-direction: column; gap: 3px; }
+.reject-head { font-size: 12px; color: #ffb3c4; font-weight: 700; }
+.reject-row { font-size: 12px; color: #e6c2cc; }
+.reject-x { position: absolute; top: 8px; right: 8px; background: none; border: none; color: #ffb3c4; cursor: pointer; font-size: 13px; line-height: 1; padding: 2px; }
+.reject-x:hover { color: #fff; }
 
 .tip { margin: 0; font-size: 12px; color: #8d85a0; line-height: 1.5; }
 .tip strong { color: #c8bedf; }
