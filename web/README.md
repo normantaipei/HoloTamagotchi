@@ -14,6 +14,22 @@ npm run dev      # 開 http://localhost:3000
 
 其他指令：`npm run build`（正式打包）、`npm run generate`（輸出純靜態，可丟任何靜態空間）、`npm run preview`。
 
+### 一鍵安裝（乾淨 VM，免先 clone repo）
+
+只要把 [`install.sh`](install.sh) 一支檔案丟到一台全新的 Linux / macOS VM 上跑，它會自動：裝 git → 裝 Node（NodeSource / nvm / brew）→ sparse-checkout 只抓 `web/` → `npm ci` + `npm run build` → 用 node 起 production server（預設對外 `0.0.0.0:3000`）。
+
+```bash
+# repo 為 public，或 VM 已有可存取 GitHub 的 SSH key：
+bash install.sh
+
+# 私有 repo 用 GitHub token（免裝 SSH key）：
+GITHUB_TOKEN=ghp_xxx bash install.sh
+```
+
+常用環境變數（皆可選）：`PORT`（預設 3000）、`HOST`（預設 0.0.0.0）、`INSTALL_DIR`（預設 `./holotamagotchi-web`）、`REPO_BRANCH`（預設 main）、`NODE_VERSION`（預設 22）、`NO_START=1`（只裝＋build 不啟動）。
+
+啟動後本機開 `http://localhost:3000`，VM 對外開 `http://<VM-IP>:3000`（記得在防火牆 / 安全群組放行該埠）。重跑同目錄會自動更新到最新 branch。免重新 build 直接啟動：`cd holotamagotchi-web/web && node .output/server/index.mjs`。
+
 ## 怎麼用
 
 版面參考手稿，分成三段：
