@@ -36,6 +36,27 @@ curl -fsSL https://raw.githubusercontent.com/normantaipei/HoloTamagotchi/main/we
 
 > 也可以把 [`install.sh`](install.sh) 下載下來用 `bash install.sh` 跑，效果相同。
 
+### 用 Docker 管理（推薦：主機免裝 node、好起好停）
+
+同一支腳本加 `DOCKER=1` 就改走容器流程：自動裝 git、（缺的話用官方腳本裝）Docker → 抓 `web/` → `docker compose up -d --build` 背景起容器（`restart: unless-stopped`）。
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/normantaipei/HoloTamagotchi/main/web/install.sh | DOCKER=1 bash
+# 換埠：
+curl -fsSL https://raw.githubusercontent.com/normantaipei/HoloTamagotchi/main/web/install.sh | DOCKER=1 PORT=8080 bash
+```
+
+跑完用標準 compose 指令管理（在 `holotamagotchi-web/web` 下）：
+
+```bash
+docker compose ps              # 看狀態
+docker compose logs -f         # 看 log
+docker compose down            # 停止並移除容器
+docker compose up -d --build   # 更新原始碼後重建
+```
+
+已經 clone 過 repo 的話也可以直接進 `web/` 跑 `docker compose up -d --build`。容器多階段打包，runtime 映像只含 `.output`（不含原始碼）。
+
 常用環境變數（皆可選）：`PORT`（預設 3000）、`HOST`（預設 0.0.0.0）、`INSTALL_DIR`（預設 `./holotamagotchi-web`）、`REPO_BRANCH`（預設 main）、`NODE_VERSION`（預設 22）、`NO_START=1`（只裝＋build 不啟動）。
 
 啟動後本機開 `http://localhost:3000`，VM 對外開 `http://<VM-IP>:3000`（記得在防火牆 / 安全群組放行該埠）。重跑同目錄會自動更新到最新 branch。免重新 build 直接啟動：`cd holotamagotchi-web/web && node .output/server/index.mjs`。

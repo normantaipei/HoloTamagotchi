@@ -1,0 +1,18 @@
+# HoloTamagotchi web —— Docker 管理
+#
+#   docker compose up -d --build   # 建置並啟動（背景）
+#   docker compose logs -f         # 看 log
+#   docker compose ps              # 看狀態
+#   docker compose down            # 停止並移除容器
+#   PORT=8080 docker compose up -d # 換對外埠
+#
+services:
+  web:
+    build: .
+    image: holotamagotchi-web
+    container_name: holotamagotchi-web
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NUXT_TELEMETRY_DISABLED=1
+    restart: unless-stopped

@@ -1,0 +1,13 @@
+# 不要進 build context（縮小傳輸、避免汙染容器內 build）
+node_modules
+.nuxt
+.output
+.data
+dist
+.git
+*.log
+.DS_Store
+.env
+demo-assets
+holo-art-demo.json
+install.sh

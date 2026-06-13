@@ -3,26 +3,37 @@
 # HoloTamagotchi —— 美術動畫 Review 模擬器 一鍵安裝 / 啟動腳本
 # =============================================================
 # 用途：把這支 install.sh 單獨丟到一台「完全乾淨」的 VM（Linux / macOS）上執行，
-#       不需要先 git clone 整個 repo，腳本會自己：
+#       不需要先 git clone 整個 repo。支援兩種模式：
+#
+#   ── 預設（裸機 node）─────────────────────────────────────────
 #         1. 確認 / 安裝 git
 #         2. 確認 / 安裝 Node.js（NodeSource apt → nvm → brew 依序嘗試）
 #         3. 用 sparse-checkout「只」抓 repo 裡的 web/ 子目錄
 #         4. npm 安裝相依、npm run build（正式打包）
 #         5. 用 node 起 production server，預設對外（0.0.0.0）開在 3000 埠
 #
+#   ── Docker 模式（DOCKER=1，用容器管理）────────────────────────
+#         1. 確認 / 安裝 git
+#         2. 確認 / 安裝 Docker（缺的話用官方 get.docker.com 腳本）
+#         3. sparse-checkout 抓 web/
+#         4. docker compose up -d --build（背景容器，restart unless-stopped）
+#       之後用 docker compose ps / logs -f / down 管理。
+#
 # 最簡用法（本 repo 為 public，免 token、免 SSH key）：
+#         # 裸機 node：
 #         curl -fsSL https://raw.githubusercontent.com/normantaipei/HoloTamagotchi/main/web/install.sh | bash
-#   或先下載再跑：
-#         bash install.sh
+#         # Docker 管理：
+#         curl -fsSL https://raw.githubusercontent.com/normantaipei/HoloTamagotchi/main/web/install.sh | DOCKER=1 bash
 #
 # 常用環境變數（都可選）：
+#         DOCKER=1       改用 Docker 模式（容器管理，免在主機裝 node）
 #         REPO_URL       覆寫來源 repo（預設指向本專案的 public HTTPS）
 #         REPO_BRANCH    分支（預設 main）
 #         INSTALL_DIR    安裝目錄（預設 ./holotamagotchi-web）
 #         PORT           對外埠（預設 3000）
-#         HOST           綁定位址（預設 0.0.0.0，對外可連）
-#         NODE_VERSION   要裝的 Node 主版本（預設 22）
-#         NO_START=1     只安裝 + build，不自動起 server
+#         HOST           綁定位址（預設 0.0.0.0，對外可連；Docker 模式固定 0.0.0.0）
+#         NODE_VERSION   要裝的 Node 主版本（預設 22；Docker 模式不適用）
+#         NO_START=1     只安裝 + build，不自動起 server（裸機模式）
 #
 set -euo pipefail
 
@@ -35,6 +46,7 @@ PORT="${PORT:-3000}"
 HOST="${HOST:-0.0.0.0}"
 NODE_VERSION="${NODE_VERSION:-22}"
 NO_START="${NO_START:-0}"
+DOCKER="${DOCKER:-0}"
 
 # ---- 小工具 ----------------------------------------------------------------
 log()  { printf '\033[1;36m▶ %s\033[0m\n' "$*"; }
@@ -175,11 +187,59 @@ EOF
   exec env HOST="$HOST" PORT="$PORT" node .output/server/index.mjs
 }
 
+# ---- 8. Docker 模式：確保 docker + compose ---------------------------------
+ensure_docker() {
+  if have docker; then
+    ok "docker 已存在：$(docker --version)"
+  else
+    log "未偵測到 docker，使用官方 get.docker.com 腳本安裝…"
+    have curl || pkg_install curl || die "需要 curl 來安裝 docker"
+    curl -fsSL https://get.docker.com | $SUDO sh || die "docker 自動安裝失敗，請手動安裝後重跑。"
+    ok "docker 安裝完成：$(docker --version)"
+  fi
+  # compose v2（plugin 形式：docker compose ...）
+  if $SUDO docker compose version >/dev/null 2>&1; then
+    ok "docker compose 可用：$($SUDO docker compose version | head -1)"
+  else
+    die "找不到 docker compose v2 plugin，請安裝 docker-compose-plugin 後重跑。"
+  fi
+}
+
+# ---- 9. Docker 模式：build + 起容器 ----------------------------------------
+docker_up() {
+  cd "$INSTALL_DIR/web"
+  [ -f Dockerfile ] || die "web/ 內找不到 Dockerfile，請確認 repo 結構。"
+  log "建置並啟動容器：docker compose up -d --build（PORT=${PORT}）"
+  PORT="$PORT" $SUDO docker compose up -d --build || die "docker compose 啟動失敗。"
+  ok "容器已啟動"
+  $SUDO docker compose ps || true
+  cat <<EOF
+
+$(ok "全部就緒！（Docker 模式）")
+  本機開：  http://localhost:${PORT}
+  VM 對外： http://<VM-IP>:${PORT}   （記得放行防火牆 / 安全群組 ${PORT} 埠）
+
+  管理指令（在 ${INSTALL_DIR}/web 下）：
+    docker compose ps        # 看狀態
+    docker compose logs -f   # 看 log
+    docker compose down      # 停止並移除容器
+    docker compose up -d --build   # 改了程式碼後重建
+EOF
+}
+
 # ---- main ------------------------------------------------------------------
 main() {
-  log "HoloTamagotchi web 一鍵安裝開始（OS: ${OS}）"
+  log "HoloTamagotchi web 一鍵安裝開始（OS: ${OS}${DOCKER:+, 模式: $([ "$DOCKER" = 1 ] && echo Docker || echo node)}）"
   have curl || pkg_install curl || warn "缺 curl，部分安裝路徑可能受影響"
   ensure_git
+
+  if [ "$DOCKER" = "1" ]; then
+    ensure_docker
+    fetch_web
+    docker_up
+    return
+  fi
+
   ensure_node
   fetch_web
   build_app
