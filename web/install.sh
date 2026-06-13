@@ -10,15 +10,13 @@
 #         4. npm 安裝相依、npm run build（正式打包）
 #         5. 用 node 起 production server，預設對外（0.0.0.0）開在 3000 埠
 #
-# 最簡用法（repo 為 public，或 VM 已有可存取 GitHub 的 SSH key）：
+# 最簡用法（本 repo 為 public，免 token、免 SSH key）：
+#         curl -fsSL https://raw.githubusercontent.com/normantaipei/HoloTamagotchi/main/web/install.sh | bash
+#   或先下載再跑：
 #         bash install.sh
 #
-# 私有 repo 用 token（不裝 SSH key 也能抓）：
-#         GITHUB_TOKEN=ghp_xxx bash install.sh
-#
 # 常用環境變數（都可選）：
-#         GITHUB_TOKEN   GitHub PAT，repo 為 private 時用它走 HTTPS
-#         REPO_URL       覆寫來源 repo（預設指向本專案）
+#         REPO_URL       覆寫來源 repo（預設指向本專案的 public HTTPS）
 #         REPO_BRANCH    分支（預設 main）
 #         INSTALL_DIR    安裝目錄（預設 ./holotamagotchi-web）
 #         PORT           對外埠（預設 3000）
@@ -116,26 +114,17 @@ ensure_node() {
   ok "Node 安裝完成：$(node -v)"
 }
 
-# ---- 4. 解析 repo URL（含 token 注入）-------------------------------------
+# ---- 4. 解析 repo URL（public repo，走匿名 HTTPS）-------------------------
 resolve_repo_url() {
   if [ -n "$REPO_URL" ]; then echo "$REPO_URL"; return; fi
-  if [ -n "${GITHUB_TOKEN:-}" ]; then
-    echo "https://${GITHUB_TOKEN}@github.com/${REPO_OWNER_REPO}.git"
-  else
-    # 無 token：優先用 SSH（VM 若有 key 最方便），無 key 時 git 會自己報錯提示
-    if [ -f "$HOME/.ssh/id_ed25519" ] || [ -f "$HOME/.ssh/id_rsa" ]; then
-      echo "git@github.com:${REPO_OWNER_REPO}.git"
-    else
-      echo "https://github.com/${REPO_OWNER_REPO}.git"
-    fi
-  fi
+  # 本 repo 為 public，匿名 HTTPS 即可 clone，免 token / 免 SSH key
+  echo "https://github.com/${REPO_OWNER_REPO}.git"
 }
 
 # ---- 5. sparse-checkout 只抓 web/ ------------------------------------------
 fetch_web() {
   local url; url="$(resolve_repo_url)"
-  local shown="${url/$GITHUB_TOKEN/***}"  # log 時遮蔽 token
-  log "抓取來源：${shown}（branch: ${REPO_BRANCH}，只取 web/）"
+  log "抓取來源：${url}（branch: ${REPO_BRANCH}，只取 web/）"
 
   if [ -d "$INSTALL_DIR/.git" ]; then
     log "偵測到既有安裝目錄，改為更新：$INSTALL_DIR"
@@ -144,7 +133,7 @@ fetch_web() {
   else
     git clone --depth 1 --filter=blob:none --sparse --branch "$REPO_BRANCH" \
       "$url" "$INSTALL_DIR" \
-      || die "git clone 失敗。若為私有 repo，請改用：GITHUB_TOKEN=xxx bash install.sh"
+      || die "git clone 失敗，請確認網路可連到 GitHub，或用 REPO_URL=... 覆寫來源。"
     git -C "$INSTALL_DIR" sparse-checkout set web
   fi
   [ -d "$INSTALL_DIR/web" ] || die "抓取後找不到 web/ 目錄，請確認 repo 結構。"

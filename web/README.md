@@ -32,9 +32,6 @@ curl -fsSL https://raw.githubusercontent.com/normantaipei/HoloTamagotchi/main/we
 
 # 只裝＋build、先不啟動：
 curl -fsSL https://raw.githubusercontent.com/normantaipei/HoloTamagotchi/main/web/install.sh | NO_START=1 bash
-
-# 私有 repo 用 GitHub token（免裝 SSH key）：
-curl -fsSL https://raw.githubusercontent.com/normantaipei/HoloTamagotchi/main/web/install.sh | GITHUB_TOKEN=ghp_xxx bash
 ```
 
 > 也可以把 [`install.sh`](install.sh) 下載下來用 `bash install.sh` 跑，效果相同。
