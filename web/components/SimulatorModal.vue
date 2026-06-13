@@ -5,6 +5,9 @@ import { ref, computed, watch } from 'vue'
 import { ACTIONS } from '~/utils/animations'
 import type { ActionOpts } from '~/utils/animations'
 import { FOODS, ENDINGS, GRADES, FPS } from '~/data/manifest'
+import { useI18n } from '~/composables/useI18n'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   actionId: string
@@ -40,16 +43,16 @@ const durLabel = computed(() => (action.value.frames / FPS / speed.value).toFixe
     <div class="modal">
       <header class="m-head">
         <div>
-          <div class="m-title">模擬器 Simulator · 裝置實機播放 On-device</div>
-          <div class="m-sub">M5Stack Fire 320×240 · 與真機相同的繪圖邏輯 Same drawing logic as the device</div>
+          <div class="m-title">{{ t('sim.title') }}</div>
+          <div class="m-sub">{{ t('sim.sub') }}</div>
         </div>
-        <button class="x" title="關閉 Close" @click="emit('close')">✕</button>
+        <button class="x" :title="t('sim.close')" @click="emit('close')">✕</button>
       </header>
 
       <div class="m-body">
         <!-- 動作快速切換 -->
         <div class="acts">
-          <button v-for="a in ACTIONS" :key="a.id" class="act" :class="{ on: a.id === actionId }" @click="actionId = a.id">{{ a.label }}</button>
+          <button v-for="a in ACTIONS" :key="a.id" class="act" :class="{ on: a.id === actionId }" @click="actionId = a.id">{{ t('action.' + a.id) }}</button>
         </div>
 
         <div class="stage">
@@ -65,33 +68,33 @@ const durLabel = computed(() => (action.value.frames / FPS / speed.value).toFixe
           />
         </div>
 
-        <div class="note">{{ action.note }}</div>
+        <div class="note">{{ t('actionNote.' + action.id) }}</div>
 
         <div v-if="action.picker" class="picker">
           <template v-if="action.picker === 'food'">
-            <button v-for="f in FOODS" :key="f.key" class="chip" :class="{ on: food === f.key }" @click="food = f.key">{{ f.label }}</button>
+            <button v-for="f in FOODS" :key="f.key" class="chip" :class="{ on: food === f.key }" @click="food = f.key">{{ t('food.' + f.key) }}</button>
           </template>
           <template v-else-if="action.picker === 'ending'">
-            <button v-for="e in ENDINGS" :key="e.id" class="chip" :class="{ on: ending === e.id }" @click="ending = e.id">{{ e.title }}</button>
+            <button v-for="e in ENDINGS" :key="e.id" class="chip" :class="{ on: ending === e.id }" @click="ending = e.id">{{ t('ending.' + e.id) }}</button>
           </template>
           <template v-else-if="action.picker === 'grade'">
-            <button v-for="g in GRADES" :key="g.id" class="chip" :class="{ on: grade === g.id }" @click="grade = g.id">{{ g.title }}</button>
+            <button v-for="g in GRADES" :key="g.id" class="chip" :class="{ on: grade === g.id }" @click="grade = g.id">{{ t('grade.' + g.id) }}</button>
           </template>
         </div>
 
         <div class="controls">
-          <button class="play" @click="playing = !playing">{{ playing ? '暫停 Pause' : '播放 Play' }}</button>
-          <button class="step" title="上一幀 Prev frame" @click="playing = false; frame = Math.max(0, frame - 1)">◀</button>
-          <button class="step" title="下一幀 Next frame" @click="playing = false; frame = Math.min(action.frames - 1, frame + 1)">▶</button>
-          <button class="step" title="重播 Replay" @click="frame = 0">⟲</button>
-          <span class="ro">幀 Frame {{ frame + 1 }} / {{ action.frames }} · {{ durLabel }}s</span>
+          <button class="play" @click="playing = !playing">{{ playing ? t('anime.pause') : t('anime.play') }}</button>
+          <button class="step" :title="t('sim.prevFrame')" @click="playing = false; frame = Math.max(0, frame - 1)">◀</button>
+          <button class="step" :title="t('sim.nextFrame')" @click="playing = false; frame = Math.min(action.frames - 1, frame + 1)">▶</button>
+          <button class="step" :title="t('sim.replay')" @click="frame = 0">⟲</button>
+          <span class="ro">{{ t('sim.frameRO', { cur: frame + 1, total: action.frames, dur: durLabel }) }}</span>
         </div>
         <input class="scrub" type="range" min="0" :max="action.frames - 1" v-model.number="frame" @input="playing = false" />
 
         <div class="sliders">
-          <label>速度 Speed {{ speed.toFixed(2) }}× <input type="range" min="0.1" max="2" step="0.05" v-model.number="speed" /></label>
-          <label>多幀速度 Frame hold 每 {{ frameHold }} 幀 <input type="range" min="1" max="20" step="1" v-model.number="frameHold" /></label>
-          <label>放大 Zoom {{ scale }}× <input type="range" min="1" max="4" step="1" v-model.number="scale" /></label>
+          <label>{{ t('sim.speed', { v: speed.toFixed(2) }) }} <input type="range" min="0.1" max="2" step="0.05" v-model.number="speed" /></label>
+          <label>{{ t('sim.frameHold', { n: frameHold }) }} <input type="range" min="1" max="20" step="1" v-model.number="frameHold" /></label>
+          <label>{{ t('sim.zoom', { n: scale }) }} <input type="range" min="1" max="4" step="1" v-model.number="scale" /></label>
         </div>
       </div>
     </div>

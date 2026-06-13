@@ -4,10 +4,12 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onBeforeUnmount, computed } from 'vue'
 import { useAssetStore } from '~/composables/useAssetStore'
+import { useI18n } from '~/composables/useI18n'
 import { SPRITES } from '~/data/manifest'
 
 const props = defineProps<{ partKey: string }>()
 const store = useAssetStore()
+const { t, locale } = useI18n()
 
 const canvas = ref<HTMLCanvasElement | null>(null)
 const playing = ref(true)
@@ -38,7 +40,7 @@ function draw() {
     ctx.fillStyle = '#6f667e'
     ctx.font = '12px sans-serif'
     ctx.textAlign = 'center'
-    ctx.fillText('尚無素材 No frames', c.width / 2, c.height / 2)
+    ctx.fillText(t('anime.noFrames'), c.width / 2, c.height / 2)
     return
   }
   const idx = Math.min(cur.value, fr.length - 1)
@@ -78,6 +80,7 @@ function stop() { cancelAnimationFrame(raf); raf = 0 }
 watch(playing, (p) => (p ? start() : (stop(), draw())))
 watch([() => props.partKey, () => store.state.ready], () => { cur.value = 0; draw() })
 watch(cur, draw)
+watch(locale, draw) // 切換語言時重畫「尚無素材」字樣
 
 onMounted(() => { draw(); if (playing.value) start() })
 onBeforeUnmount(stop)
@@ -85,17 +88,17 @@ onBeforeUnmount(stop)
 
 <template>
   <div class="anime">
-    <div class="cap">動畫輪播 Anime Loop</div>
+    <div class="cap">{{ t('anime.loop') }}</div>
     <canvas ref="canvas" width="288" height="216" class="cv" />
     <div class="bar">
-      <button class="b wide" @click="playing = !playing">{{ playing ? '暫停 Pause' : '播放 Play' }}</button>
-      <button class="b wide" :class="{ on: loop }" title="循環播放 Loop" @click="loop = !loop">循環 Loop</button>
+      <button class="b wide" @click="playing = !playing">{{ playing ? t('anime.pause') : t('anime.play') }}</button>
+      <button class="b wide" :class="{ on: loop }" :title="t('anime.loopTitle')" @click="loop = !loop">{{ t('anime.loopBtn') }}</button>
     </div>
-    <label class="fps" title="輪播速度 Playback speed">
-      速度 Speed {{ fps }}fps
+    <label class="fps" :title="t('anime.speedTitle')">
+      {{ t('anime.speed', { n: fps }) }}
       <input type="range" min="1" max="24" step="1" v-model.number="fps" />
     </label>
-    <div class="count">{{ frames.length ? (Math.min(cur, frames.length - 1) + 1) + ' / ' + frames.length + ' 幀 frames' : '—' }}</div>
+    <div class="count">{{ frames.length ? t('anime.count', { cur: Math.min(cur, frames.length - 1) + 1, total: frames.length }) : '—' }}</div>
   </div>
 </template>
 

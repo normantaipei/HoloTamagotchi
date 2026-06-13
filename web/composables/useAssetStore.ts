@@ -7,6 +7,7 @@
 // 以 localStorage 持久化 dataURL，重整網頁不會掉圖。圖片只存在瀏覽器，不會上傳到任何伺服器。
 
 import { reactive } from 'vue'
+import { useI18n } from './useI18n'
 
 export interface AssetFrame {
   name: string
@@ -117,12 +118,13 @@ export function useAssetStore() {
   // 檢查單一檔案是否可上傳；可上傳回 null，否則回傳被擋原因（給 UI 顯示）。
   // remainingBudget：本批此前已預扣後，總量上限還剩多少。
   function rejectReason(file: File, remainingBudget: number): string | null {
+    const { t } = useI18n()
     if (!file.type.startsWith('image/'))
-      return `${file.name}：不是圖片檔，已略過 / not an image, skipped`
+      return t('reject.notImage', { name: file.name })
     if (file.size > MAX_FILE_BYTES)
-      return `${file.name}（${formatBytes(file.size)}）超過單檔上限 ${formatBytes(MAX_FILE_BYTES)}，已略過 / over per-file limit, skipped`
+      return t('reject.overFile', { name: file.name, size: formatBytes(file.size), max: formatBytes(MAX_FILE_BYTES) })
     if (file.size > remainingBudget)
-      return `${file.name}：再加會超過素材總量上限 ${formatBytes(MAX_TOTAL_BYTES)}，已略過 / would exceed total limit, skipped`
+      return t('reject.overTotal', { name: file.name, max: formatBytes(MAX_TOTAL_BYTES) })
     return null
   }
 

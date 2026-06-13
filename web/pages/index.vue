@@ -3,10 +3,12 @@
      下＝Save（工作儲存）/ 模擬（Compile，裝置實機播放）。 -->
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { EDIT_GROUPS, SPRITES } from '~/data/manifest'
+import { EDIT_GROUPS } from '~/data/manifest'
 import { useAssetStore } from '~/composables/useAssetStore'
+import { useI18n } from '~/composables/useI18n'
 
 const store = useAssetStore()
+const { t, locale, setLocale } = useI18n()
 
 const groupId = ref('idle')
 const group = computed(() => EDIT_GROUPS.find((g) => g.id === groupId.value)!)
@@ -46,7 +48,7 @@ function save() {
   a.download = `holo-art-${new Date().toISOString().slice(0, 10)}.json`
   a.click()
   URL.revokeObjectURL(url)
-  flash('已匯出工作檔 Exported（也已自動存在瀏覽器 also auto-saved locally）')
+  flash(t('toast.exported'))
 }
 async function loadFile(e: Event) {
   const input = e.target as HTMLInputElement
@@ -55,15 +57,15 @@ async function loadFile(e: Event) {
   try {
     const obj = JSON.parse(await file.text())
     store.importJSON(obj)
-    flash('已載入工作檔 Loaded')
+    flash(t('toast.loaded'))
   } catch {
-    flash('載入失敗：檔案格式不正確 Load failed: invalid file')
+    flash(t('toast.loadFailed'))
   }
   input.value = ''
 }
 
 const total = computed(() => store.totalCount())
-const partLabel = (k: string) => SPRITES[k].label
+const partLabel = (k: string) => t('sprite.' + k)
 </script>
 
 <template>
@@ -71,19 +73,25 @@ const partLabel = (k: string) => SPRITES[k].label
     <!-- 頂部：動作 List -->
     <header class="topbar">
       <div class="brand">
-        <span class="title">美術動畫模擬器 Art Animation Simulator</span>
+        <span class="title">{{ t('app.title') }}</span>
       </div>
       <nav class="tabs">
         <button v-for="g in EDIT_GROUPS" :key="g.id" class="tab" :class="{ on: g.id === groupId }" @click="selectGroup(g.id)">
-          {{ g.label }}
+          {{ t('group.' + g.id) }}
         </button>
       </nav>
+      <label class="lang" :title="t('lang.label')">
+        <select :value="locale" @change="setLocale(($event.target as HTMLSelectElement).value as any)">
+          <option value="zh">{{ t('lang.zh') }}</option>
+          <option value="en">{{ t('lang.en') }}</option>
+        </select>
+      </label>
     </header>
 
     <main class="work">
       <!-- 多部件動作的部件選擇（單部件不顯示）-->
       <div v-if="group.parts.length > 1" class="parts">
-        <span class="parts-label">部件 Parts：</span>
+        <span class="parts-label">{{ t('parts.label') }}：</span>
         <button v-for="k in group.parts" :key="k" class="part" :class="{ on: k === partKey, has: store.count(k) > 0 }" @click="partKey = k">
           {{ partLabel(k) }}<span v-if="store.count(k)" class="badge">{{ store.count(k) }}</span>
         </button>
@@ -96,21 +104,21 @@ const partLabel = (k: string) => SPRITES[k].label
         </section>
         <aside class="anime-panel">
           <AnimePreview :part-key="partKey" />
-          <button class="sim-btn" @click="openSim">模擬 Simulate（裝置實機 On-device）</button>
+          <button class="sim-btn" @click="openSim">{{ t('sim.onDevice') }}</button>
         </aside>
       </div>
 
       <!-- 底部：Save / Compile -->
       <footer class="actionbar">
-        <button class="bar-btn save" @click="save">儲存 Save</button>
+        <button class="bar-btn save" @click="save">{{ t('bar.save') }}</button>
         <label class="bar-btn ghost">
-          載入 Load
+          {{ t('bar.load') }}
           <input type="file" accept="application/json" @change="loadFile" />
         </label>
-        <button class="bar-btn compile" @click="openSim">模擬 Simulate</button>
+        <button class="bar-btn compile" @click="openSim">{{ t('bar.simulate') }}</button>
         <span class="spacer" />
-        <span class="stat">共 {{ total }} 張素材 / {{ total }} assets</span>
-        <button class="bar-btn ghost danger" @click="store.clearAll()">清空全部 Clear all</button>
+        <span class="stat">{{ t('bar.assetCount', { n: total }) }}</span>
+        <button class="bar-btn ghost danger" @click="store.clearAll()">{{ t('bar.clearAll') }}</button>
       </footer>
     </main>
 
@@ -133,6 +141,10 @@ const partLabel = (k: string) => SPRITES[k].label
 .tab { font-size: 13px; padding: 7px 13px; border-radius: 9px; background: #1b1722; color: #d8d2e4; border: 1px solid #2a2333; cursor: pointer; }
 .tab:hover { background: #251f30; }
 .tab.on { background: #F0405A; color: #fff; border-color: #F0405A; }
+
+.lang { margin-left: auto; }
+.lang select { font-size: 13px; padding: 7px 28px 7px 12px; border-radius: 9px; background: #1b1722; color: #d8d2e4; border: 1px solid #2a2333; cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%238d85a0' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
+.lang select:hover { background-color: #251f30; }
 
 .work { flex: 1; display: flex; flex-direction: column; gap: 16px; padding: 18px 20px 90px; max-width: 1200px; width: 100%; margin: 0 auto; }
 
