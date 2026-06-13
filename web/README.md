@@ -14,17 +14,30 @@ npm run dev      # 開 http://localhost:3000
 
 其他指令：`npm run build`（正式打包）、`npm run generate`（輸出純靜態，可丟任何靜態空間）、`npm run preview`。
 
-### 一鍵安裝（乾淨 VM，免先 clone repo）
+### 一鍵安裝（乾淨 VM，一行命令，免先 clone repo）
 
-只要把 [`install.sh`](install.sh) 一支檔案丟到一台全新的 Linux / macOS VM 上跑，它會自動：裝 git → 裝 Node（NodeSource / nvm / brew）→ sparse-checkout 只抓 `web/` → `npm ci` + `npm run build` → 用 node 起 production server（預設對外 `0.0.0.0:3000`）。
+在一台全新的 Linux / macOS VM 上，**貼一行就好**：
 
 ```bash
-# repo 為 public，或 VM 已有可存取 GitHub 的 SSH key：
-bash install.sh
+curl -fsSL https://raw.githubusercontent.com/normantaipei/HoloTamagotchi/main/web/install.sh | bash
+```
+
+它會自動：裝 git → 裝 Node（NodeSource / nvm / brew）→ sparse-checkout 只抓 `web/` → `npm ci` + `npm run build` → 用 node 起 production server（預設對外 `0.0.0.0:3000`）。跑完直接開 `http://<VM-IP>:3000`。
+
+想客製化就在 `bash` 前面塞環境變數：
+
+```bash
+# 換對外埠：
+curl -fsSL https://raw.githubusercontent.com/normantaipei/HoloTamagotchi/main/web/install.sh | PORT=8080 bash
+
+# 只裝＋build、先不啟動：
+curl -fsSL https://raw.githubusercontent.com/normantaipei/HoloTamagotchi/main/web/install.sh | NO_START=1 bash
 
 # 私有 repo 用 GitHub token（免裝 SSH key）：
-GITHUB_TOKEN=ghp_xxx bash install.sh
+curl -fsSL https://raw.githubusercontent.com/normantaipei/HoloTamagotchi/main/web/install.sh | GITHUB_TOKEN=ghp_xxx bash
 ```
+
+> 也可以把 [`install.sh`](install.sh) 下載下來用 `bash install.sh` 跑，效果相同。
 
 常用環境變數（皆可選）：`PORT`（預設 3000）、`HOST`（預設 0.0.0.0）、`INSTALL_DIR`（預設 `./holotamagotchi-web`）、`REPO_BRANCH`（預設 main）、`NODE_VERSION`（預設 22）、`NO_START=1`（只裝＋build 不啟動）。
 
