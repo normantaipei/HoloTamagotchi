@@ -30,10 +30,10 @@ function draw() {
   ctx.imageSmoothingEnabled = false
   ctx.clearRect(0, 0, c.width, c.height)
   // 棋盤底，方便看透明 / 邊界
-  const t = 8
-  for (let y = 0; y < c.height; y += t) for (let x = 0; x < c.width; x += t) {
-    ctx.fillStyle = ((x / t + y / t) % 2 === 0) ? '#15121b' : '#1b1722'
-    ctx.fillRect(x, y, t, t)
+  const tile = 8
+  for (let y = 0; y < c.height; y += tile) for (let x = 0; x < c.width; x += tile) {
+    ctx.fillStyle = ((x / tile + y / tile) % 2 === 0) ? '#15121b' : '#1b1722'
+    ctx.fillRect(x, y, tile, tile)
   }
   const fr = frames.value
   if (!fr.length) {
