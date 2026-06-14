@@ -70,18 +70,27 @@ void AssetManager::draw(const char* key, int x, int y, int w, int h, bool showLa
     if (x < 0) x = (config::SCREEN_W - w) / 2;
     if (y < 0) y = (config::SCREEN_H - h) / 2;
 
-    // 1) 有對應圖片就畫圖片（raw RGB565，整塊一次貼到 canvas）。
-    //    pushImage 無法縮放，故圖片以原生尺寸「置中對齊」到呼叫端指定的 (x,y,w,h) 方框：
-    //    方框 == 圖片尺寸時等同貼左上角；方框會變動時（如餵食動畫的食物）圖片中心仍維持
-    //    在方框中心、不會因 size 改變而飄移。
+    // 1) 有對應圖片就畫圖片（raw RGB565，整塊一次貼到 canvas），一律以方框中心對齊。
     const assets::ImageAsset* img = findImage(key);
     if (img) {
-        int ix = x + (w - img->w) / 2;
-        int iy = y + (h - img->h) / 2;
-        if (img->transp == 0xFFFF)
-            canvas_->pushImage(ix, iy, img->w, img->h, img->data);
-        else
-            canvas_->pushImage(ix, iy, img->w, img->h, img->data, img->transp);
+        if (w == img->w && h == img->h) {
+            // 尺寸相符：直接貼（最快、最銳利）；置中對齊此時等同貼左上角。
+            int ix = x + (w - img->w) / 2;
+            int iy = y + (h - img->h) / 2;
+            if (img->transp == 0xFFFF) canvas_->pushImage(ix, iy, img->w, img->h, img->data);
+            else canvas_->pushImage(ix, iy, img->w, img->h, img->data, img->transp);
+        } else {
+            // 尺寸不同：以方框中心為基準縮放（餵食食物縮小、破殼蛋長大）。
+            // pushImageRotateZoom 用最近鄰取樣，邊緣會略鋸齒、但透明色鍵仍精確比對（去背正常）。
+            float zx = (float)w / img->w, zy = (float)h / img->h;
+            float cx = x + w / 2.0f, cy = y + h / 2.0f;
+            if (img->transp == 0xFFFF)
+                canvas_->pushImageRotateZoom(cx, cy, img->w / 2.0f, img->h / 2.0f,
+                                             0.0f, zx, zy, img->w, img->h, img->data);
+            else
+                canvas_->pushImageRotateZoom(cx, cy, img->w / 2.0f, img->h / 2.0f,
+                                             0.0f, zx, zy, img->w, img->h, img->data, img->transp);
+        }
         return;
     }
     // 2) 否則畫佔位。角色類 key 畫寵物臉，其餘色塊 + 標籤。
