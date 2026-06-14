@@ -1,0 +1,7 @@
+{
+  "securityLevel": "loose",
+  "maxTextSize": 9000000,
+  "maxEdges": 2000,
+  "flowchart": { "htmlLabels": true, "curve": "basis" },
+  "themeVariables": { "fontSize": "16px" }
+}

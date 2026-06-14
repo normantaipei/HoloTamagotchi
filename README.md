@@ -55,6 +55,20 @@ HoloTamagotchi/
 
 ---
 
+## 文件
+
+| 文件 | 內容 |
+|------|------|
+| [docs/character-states-for-art.md](docs/character-states-for-art.md) | **角色狀態總覽（給美術看的白話版）** — 六大場景、心情、美術交付清單，含範例圖流程圖 |
+| [docs/character-states-for-art.en.md](docs/character-states-for-art.en.md) | 同上英文版 / Artist-friendly states overview (English) |
+| [docs/character-state-machine.md](docs/character-state-machine.md) | 角色狀態機（給工程的技術版）— 觸發條件、數值規則、config 常數 |
+| [web/README.md](web/README.md) | 動畫模擬器（瀏覽器預覽真機播放） |
+| [device/assets/README.md](device/assets/README.md) | 美術放圖規格與流程 |
+
+![角色狀態流程圖](docs/character-states-for-art.png)
+
+---
+
 ## 環境準備（只做一次）
 
 ```bash
