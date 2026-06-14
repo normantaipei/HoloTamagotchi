@@ -49,6 +49,7 @@ void setup() {
 
     // 建立 canvas（PSRAM）。Fire 有 4MB PSRAM，足以容納 320x240x16bpp。
     canvas.setColorDepth(16);
+    // 全螢幕 16bpp canvas = 150KB；內部 SRAM 最大連續區塊僅 ~110KB 容不下，故放 PSRAM。
     canvas.setPsram(true);
     // 我們的圖片陣列是「原生位元組順序」的 RGB565（build_assets.py 產生），
     // 而 M5GFX pushImage 預設把影像資料當成 swapped；不開這個就會顏色暖↔冷反轉
@@ -80,6 +81,8 @@ void setup() {
 }
 
 void loop() {
+    uint32_t t0 = millis();                 // 幀率對齊：量測本幀工作耗時
+
     M5.update();                            // 更新按鍵 / 觸控狀態（每圈一次）
 
     StateId nxt = current->update();        // 邏輯 + 把整張畫面畫進 canvas
@@ -96,5 +99,10 @@ void loop() {
         Serial.printf("-> state %s\n", stateName(currentId));
     }
 
-    delay(config::FRAME_MS);                 // ~20fps
+    // 幀率對齊：補足到 FRAME_MS（含繪圖 + pushSprite 的耗時），固定 ~20fps，
+    // 與 web 模擬器一致。原本「無條件 delay(FRAME_MS)」會變成「工作 + 50ms」→ 偏慢。
+    // 幀率對齊：補足到 FRAME_MS（含繪圖 + pushSprite 耗時），固定步調、與 web 模擬器一致。
+    // （原本「無條件 delay(FRAME_MS)」= 工作 + 50ms，會明顯偏慢。）
+    uint32_t elapsed = millis() - t0;
+    if (elapsed < (uint32_t)config::FRAME_MS) delay(config::FRAME_MS - elapsed);
 }
