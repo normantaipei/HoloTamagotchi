@@ -21,7 +21,9 @@
 #include "states/InitState.h"
 #include "states/NormalRoom.h"
 #include "states/Feeding.h"
-#include "states/Stubs.h"
+#include "states/Sleeping.h"
+#include "states/Petting.h"
+#include "states/Ending.h"
 
 // 全螢幕雙緩衝畫布（150KB，建在 PSRAM）。
 static M5Canvas canvas(&M5.Display);
