@@ -28,11 +28,15 @@ export interface ActionDef {
   id: string
   label: string
   group: string
-  frames: number // 一輪幾幀（裝置 50ms/幀）
+  frames: number // 一輪幾幀
   loop: boolean
   note?: string // 提示文字
   sprites: string[] // 這個動作會用到的 sprite key（給「相關素材」面板）
   picker?: 'food' | 'ending' | 'grade'
+  // 真機實測每幀耗時（ms）。裝置主迴圈固定步調 ~50ms，但「有背景」的畫面每幀要把整張
+  // bg_room 寫進 PSRAM canvas + 整張 pushSprite，實測 ~70ms（~14fps）；只清色底的畫面
+  // 工作 <50ms、被幀率對齊補到 50ms（20fps）。未填 = 50ms。模擬器照這個播 → 與真機同速。
+  deviceFrameMs?: number
   render: (r: Renderer, opts: ActionOpts) => void
 }
 
@@ -202,14 +206,16 @@ function renderResult(r: Renderer, opts: ActionOpts) {
   r.text(`Max combo ${g.pets}   B: back`, 70, 210, C.dark, 11)
 }
 
+// deviceFrameMs：有背景的畫面（idle/yawn/cheer/eat/pet）真機 ~70ms（~14fps）；
+// 只清色底的（egg/sleep/ending/result）~50ms（20fps，未填即 50）。
 export const ACTIONS: ActionDef[] = [
   { id: 'egg', label: '破殼 Egg', group: '生命週期', frames: ANIM_FRAMES + 1, loop: false, note: '開機 / 重置：蛋隨進度放大（24 幀 ≈ 1.2s）', sprites: ['egg'], render: renderEgg },
-  { id: 'idle', label: '待機 Idle', group: '日常', frames: 40, loop: true, note: '主畫面待機。多幀素材會依「多幀速度」輪播', sprites: ['idle', 'bg_room'], render: renderIdle },
-  { id: 'yawn', label: '打哈欠 Yawn', group: '日常', frames: 48, loop: true, note: '疲勞高時隨機觸發（24 幀）後回待機', sprites: ['yawn', 'idle', 'bg_room'], render: renderYawn },
-  { id: 'cheer', label: '加油 Cheer', group: '日常', frames: 90, loop: true, note: '隨機觸發（60 幀）+ 對話泡泡，後回待機', sprites: ['cheer', 'idle', 'bg_room'], render: renderCheer },
-  { id: 'eat', label: '餵食 Eat', group: '互動', frames: EAT_FRAMES, loop: false, note: '一口一口咬（4 口 × 9 幀 + 6 收尾 ≈ 2.1s）。可換甜點', sprites: ['eat', 'bg_room', 'food_0'], picker: 'food', render: renderEat },
+  { id: 'idle', label: '待機 Idle', group: '日常', frames: 40, loop: true, deviceFrameMs: 70, note: '主畫面待機。多幀素材會依「多幀速度」輪播', sprites: ['idle', 'bg_room'], render: renderIdle },
+  { id: 'yawn', label: '打哈欠 Yawn', group: '日常', frames: 48, loop: true, deviceFrameMs: 70, note: '疲勞高時隨機觸發（24 幀）後回待機', sprites: ['yawn', 'idle', 'bg_room'], render: renderYawn },
+  { id: 'cheer', label: '加油 Cheer', group: '日常', frames: 90, loop: true, deviceFrameMs: 70, note: '隨機觸發（60 幀）+ 對話泡泡，後回待機', sprites: ['cheer', 'idle', 'bg_room'], render: renderCheer },
+  { id: 'eat', label: '餵食 Eat', group: '互動', frames: EAT_FRAMES, loop: false, deviceFrameMs: 70, note: '一口一口咬（4 口 × 9 幀 + 6 收尾）。真機 ~14fps 故實際 ~3s。可換甜點', sprites: ['eat', 'bg_room', 'food_0'], picker: 'food', render: renderEat },
   { id: 'sleep', label: '睡覺 Sleep', group: '日常', frames: 40, loop: true, note: '2 幀呼吸輪播（每 10 幀換 + 上下 2px）', sprites: ['sleep'], render: renderSleep },
-  { id: 'pet', label: '摸頭 Pet', group: '互動', frames: 160, loop: true, note: '時間內摸滿親密度條＝成功，沒滿＝失敗。自動示範：手左右擺、開心 + 愛心', sprites: ['pet', 'idle', 'bg_room'], render: renderPet },
+  { id: 'pet', label: '摸頭 Pet', group: '互動', frames: 160, loop: true, deviceFrameMs: 70, note: '時間內摸滿親密度條＝成功，沒滿＝失敗。自動示範：手左右擺、開心 + 愛心', sprites: ['pet', 'idle', 'bg_room'], render: renderPet },
   { id: 'ending', label: '結局 Ending', group: '結局', frames: 40, loop: true, note: '4 種結局圖。可切換分支', sprites: ['end_good', 'end_normal', 'end_bad', 'end_runaway'], picker: 'ending', render: renderEnding },
   { id: 'result', label: '摸頭結算 Result', group: '結局', frames: 40, loop: true, note: '摸頭結算情緒圖（成功 / 失敗）。可切換', sprites: ['emo_success', 'emo_fail'], picker: 'grade', render: renderResult },
 ]

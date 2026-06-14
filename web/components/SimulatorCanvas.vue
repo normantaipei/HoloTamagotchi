@@ -1,7 +1,8 @@
 <!-- SimulatorCanvas.vue — 把指定動作的第 N 幀畫到放大後的螢幕。
      - 320×240 離屏 canvas 作畫（裝置原生解析度），再以最近鄰放大到可視 canvas，
        忠實呈現小螢幕顆粒感。
-     - 內建 20fps × 速度 的播放迴圈（requestAnimationFrame + 累加器）。
+     - 播放迴圈（requestAnimationFrame + 累加器）依「該動作的真機實測幀時間」步進
+       （deviceFrameMs；有背景的畫面 ~70ms≈14fps，其餘 50ms=20fps）× 速度。
      - frame 用 v-model 雙向綁定，方便外層拖時間軸。 -->
 <script setup lang="ts">
 import { ref, watch, onMounted, onBeforeUnmount, computed } from 'vue'
@@ -64,7 +65,10 @@ function tick(now: number) {
   const dt = now - last
   last = now
   acc += dt
-  const step = 1000 / FPS / Math.max(0.05, props.speed)
+  // 每幀步進用「該動作的真機實測幀時間」（deviceFrameMs，未填即 50ms = 20fps），
+  // 讓播放速度與真機一致：有背景的畫面真機 ~70ms（~14fps），會比 20fps 慢且較頓。
+  const deviceMs = props.action.deviceFrameMs ?? 1000 / FPS
+  const step = deviceMs / Math.max(0.05, props.speed)
   let advanced = false
   while (acc >= step) {
     acc -= step
