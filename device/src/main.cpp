@@ -20,6 +20,7 @@
 #include "states/State.h"
 #include "states/InitState.h"
 #include "states/NormalRoom.h"
+#include "states/Feeding.h"
 #include "states/Stubs.h"
 
 // 全螢幕雙緩衝畫布（150KB，建在 PSRAM）。

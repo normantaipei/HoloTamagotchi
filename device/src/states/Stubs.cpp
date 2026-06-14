@@ -19,15 +19,6 @@ void drawStub(M5Canvas* cv, const char* title, const char* hint, uint16_t bg) {
 }
 }  // namespace
 
-StateId Feeding::update() {
-    drawStub(game->canvas, "FEEDING", "B: feed & back (stub)", config::DARK);
-    if (M5.BtnB.wasPressed()) {
-        game->metrics.feed();                    // 維持原效果：飽食度 +
-        return StateId::NormalRoom;
-    }
-    return StateId::None;
-}
-
 StateId Petting::update() {
     drawStub(game->canvas, "PETTING", "B: success & back (stub)", config::DARK);
     if (M5.BtnB.wasPressed()) {
