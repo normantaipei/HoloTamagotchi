@@ -6,7 +6,7 @@
 #   - 之後美術把圖片丟進角色資料夾、在 manifest 的 IMAGES 補一行 → 自動換成圖片。
 #   - 新增角色：複製一份角色資料夾、改 manifest、在 REGISTRY 註冊，邏輯不用動。
 #
-# 每個資源用一個 key 表示（例如 "idle"/"bg_room"/"end_idol"），
+# 每個資源用一個 key 表示（例如 "idle"/"bg_room"/"end_good"），
 # 佔位規格與圖片路徑都由角色 manifest 定義（assets/characters/<id>/character.py）。
 
 import config
@@ -37,9 +37,9 @@ PET_EXPR = {
     "pet":         "happy",
     "eat":         "eating",
     "sleep":       "sleepy",
-    "end_idol":    "excited",
-    "end_office":  "neutral",
-    "end_pirate":  "happy",
+    "end_good":    "excited",
+    "end_normal":  "neutral",
+    "end_bad":     "happy",
     "end_runaway": "sad",
     "emo_success": "excited",
     "emo_fail":    "sad",

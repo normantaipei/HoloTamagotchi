@@ -62,10 +62,10 @@ export const SPRITES: Record<string, SpriteSpec> = {
   eat: { key: 'eat', color: '#F07090', label: 'ANIM: Eat', w: CHAR_W, h: CHAR_H, folder: 'anim', suggested: 'eat.jpg', category: 'anim', desc: '嚼食（餵食時一口一口咬）' },
   sleep: { key: 'sleep', color: '#405080', label: 'ANIM: Sleep', w: CHAR_W, h: CHAR_H, folder: 'anim', suggested: 'sleep.jpg', category: 'anim', desc: '蓋被子睡覺（2 幀呼吸輪播）' },
   // --- 結局圖（皆 150×150 統一畫布）---
-  end_idol: { key: 'end_idol', color: '#FFD24A', label: 'END: Idol', w: CHAR_W, h: CHAR_H, folder: 'portraits', suggested: 'idol.jpg', category: 'ending', desc: '偶像結局（音遊率 > 90%）' },
-  end_office: { key: 'end_office', color: '#6A86C0', label: 'END: Office', w: CHAR_W, h: CHAR_H, folder: 'portraits', suggested: 'office.jpg', category: 'ending', desc: '上班族結局（音遊率 30~90%）' },
-  end_pirate: { key: 'end_pirate', color: '#9A3A3A', label: 'END: Pirate', w: CHAR_W, h: CHAR_H, folder: 'portraits', suggested: 'pirate.jpg', category: 'ending', desc: '海賊結局（音遊率 < 30%）' },
-  end_runaway: { key: 'end_runaway', color: '#404048', label: 'END: Run away', w: CHAR_W, h: CHAR_H, folder: 'portraits', suggested: 'runaway.jpg', category: 'ending', desc: '離家出走（壞結局，飽食度歸零）' },
+  end_good: { key: 'end_good', color: '#FFD24A', label: 'END: Good', w: CHAR_W, h: CHAR_H, folder: 'portraits', suggested: 'idol.jpg', category: 'ending', desc: '好結局（互動率 > 90%）' },
+  end_normal: { key: 'end_normal', color: '#6A86C0', label: 'END: Normal', w: CHAR_W, h: CHAR_H, folder: 'portraits', suggested: 'office.jpg', category: 'ending', desc: '普通結局（互動率 30~90%）' },
+  end_bad: { key: 'end_bad', color: '#9A3A3A', label: 'END: Bad', w: CHAR_W, h: CHAR_H, folder: 'portraits', suggested: 'pirate.jpg', category: 'ending', desc: '壞結局（互動率 < 30%）' },
+  end_runaway: { key: 'end_runaway', color: '#404048', label: 'END: Run away', w: CHAR_W, h: CHAR_H, folder: 'portraits', suggested: 'runaway.jpg', category: 'ending', desc: '離家出走（飽食度歸零）' },
   // --- 摸頭結算情緒圖（成功 / 失敗，皆 150×150 統一畫布）---
   emo_success: { key: 'emo_success', color: '#FFD24A', label: 'EMO: Success', w: CHAR_W, h: CHAR_H, folder: 'portraits', suggested: 'emo_success.jpg', category: 'emotion', desc: '成功（時間內摸滿親密度條）' },
   emo_fail: { key: 'emo_fail', color: '#9A6A6A', label: 'EMO: Fail', w: CHAR_W, h: CHAR_H, folder: 'portraits', suggested: 'emo_fail.jpg', category: 'emotion', desc: '失敗（時間到沒摸滿）' },
@@ -81,7 +81,7 @@ export const SPRITES: Record<string, SpriteSpec> = {
 export const CATEGORIES: { id: SpriteSpec['category']; label: string; keys: string[] }[] = [
   { id: 'background', label: '背景 Backgrounds', keys: ['bg_room', 'bg_game'] },
   { id: 'anim', label: '動作 Animations', keys: ['egg', 'idle', 'yawn', 'cheer', 'pet', 'eat', 'sleep'] },
-  { id: 'ending', label: '結局 Endings', keys: ['end_idol', 'end_office', 'end_pirate', 'end_runaway'] },
+  { id: 'ending', label: '結局 Endings', keys: ['end_good', 'end_normal', 'end_bad', 'end_runaway'] },
   { id: 'emotion', label: '摸頭結算 Emotions', keys: ['emo_success', 'emo_fail'] },
   { id: 'food', label: '食物 Food', keys: ['food_0', 'food_1', 'food_2', 'food_3', 'food_4'] },
 ]
@@ -96,9 +96,9 @@ export const PET_EXPR: Record<string, string> = {
   pet: 'happy',
   eat: 'eating',
   sleep: 'sleepy',
-  end_idol: 'excited',
-  end_office: 'neutral',
-  end_pirate: 'happy',
+  end_good: 'excited',
+  end_normal: 'neutral',
+  end_bad: 'happy',
   end_runaway: 'sad',
   emo_success: 'excited',
   emo_fail: 'sad',
@@ -115,9 +115,9 @@ export const FOODS = [
 
 // 結局分支（ending.py）。
 export const ENDINGS = [
-  { id: 'idol', key: 'end_idol', title: 'IDOL', rate: 95 },
-  { id: 'office', key: 'end_office', title: 'OFFICE WORKER', rate: 60 },
-  { id: 'pirate', key: 'end_pirate', title: 'PIRATE', rate: 15 },
+  { id: 'good', key: 'end_good', title: 'GOOD END', rate: 95 },
+  { id: 'normal', key: 'end_normal', title: 'NORMAL END', rate: 60 },
+  { id: 'bad', key: 'end_bad', title: 'BAD END', rate: 15 },
   { id: 'runaway', key: 'end_runaway', title: 'RUN AWAY', rate: 0 },
 ]
 
@@ -149,7 +149,7 @@ export const EDIT_GROUPS: EditGroup[] = [
   { id: 'cheer', label: 'Cheer 加油', parts: ['cheer'], actionId: 'cheer' },
   { id: 'pet', label: 'Pet 摸頭', parts: ['pet'], actionId: 'pet' },
   { id: 'egg', label: 'Egg 破殼', parts: ['egg'], actionId: 'egg' },
-  { id: 'ending', label: 'Ending 結局', parts: ['end_idol', 'end_office', 'end_pirate', 'end_runaway'], actionId: 'ending', partType: 'ending' },
+  { id: 'ending', label: 'Ending 結局', parts: ['end_good', 'end_normal', 'end_bad', 'end_runaway'], actionId: 'ending', partType: 'ending' },
   { id: 'result', label: 'Result 結算', parts: ['emo_success', 'emo_fail'], actionId: 'result', partType: 'grade' },
   { id: 'bg', label: 'BG 背景', parts: ['bg_room', 'bg_game'], actionId: null },
 ]

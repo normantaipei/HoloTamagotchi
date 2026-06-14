@@ -22,7 +22,7 @@ const actionId = ref(props.actionId)
 const action = computed(() => ACTIONS.find((a) => a.id === actionId.value) || ACTIONS[0])
 
 const food = ref(props.food || 'food_0')
-const ending = ref(props.ending || 'idol')
+const ending = ref(props.ending || 'good')
 const grade = ref(props.grade || 'success')
 const opts = computed<ActionOpts>(() => ({ food: food.value, ending: ending.value, grade: grade.value }))
 

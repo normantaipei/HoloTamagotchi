@@ -183,7 +183,7 @@ function renderPet(r: Renderer) {
 
 // --- ending：ending.py ---
 function renderEnding(r: Renderer, opts: ActionOpts) {
-  const e = ENDINGS.find((x) => x.id === (opts.ending || 'idol')) || ENDINGS[0]
+  const e = ENDINGS.find((x) => x.id === (opts.ending || 'good')) || ENDINGS[0]
   r.clear(C.black)
   r.drawSprite(e.key, 85, 36) // 統一 150×150
   r.text('ENDING: ' + e.title, 30, 14, C.yellow, 22)
@@ -210,6 +210,6 @@ export const ACTIONS: ActionDef[] = [
   { id: 'eat', label: '餵食 Eat', group: '互動', frames: EAT_FRAMES, loop: false, note: '一口一口咬（4 口 × 9 幀 + 6 收尾 ≈ 2.1s）。可換甜點', sprites: ['eat', 'bg_room', 'food_0'], picker: 'food', render: renderEat },
   { id: 'sleep', label: '睡覺 Sleep', group: '日常', frames: 40, loop: true, note: '2 幀呼吸輪播（每 10 幀換 + 上下 2px）', sprites: ['sleep'], render: renderSleep },
   { id: 'pet', label: '摸頭 Pet', group: '互動', frames: 160, loop: true, note: '時間內摸滿親密度條＝成功，沒滿＝失敗。自動示範：手左右擺、開心 + 愛心', sprites: ['pet', 'idle', 'bg_room'], render: renderPet },
-  { id: 'ending', label: '結局 Ending', group: '結局', frames: 40, loop: true, note: '4 種結局圖。可切換分支', sprites: ['end_idol', 'end_office', 'end_pirate', 'end_runaway'], picker: 'ending', render: renderEnding },
+  { id: 'ending', label: '結局 Ending', group: '結局', frames: 40, loop: true, note: '4 種結局圖。可切換分支', sprites: ['end_good', 'end_normal', 'end_bad', 'end_runaway'], picker: 'ending', render: renderEnding },
   { id: 'result', label: '摸頭結算 Result', group: '結局', frames: 40, loop: true, note: '摸頭結算情緒圖（成功 / 失敗）。可切換', sprites: ['emo_success', 'emo_fail'], picker: 'grade', render: renderResult },
 ]

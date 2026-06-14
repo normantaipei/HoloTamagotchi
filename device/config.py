@@ -84,9 +84,11 @@ P_CHEER  = 0.10
 #       時間到還沒填滿 → 失敗。只有成功 / 失敗兩種結果。
 PET_SUCCESS_STROKES = 28     # 成功門檻（有效摸頭次數 = 親密度條滿格）
 
-# --- 結局：RhythmGameRate 分支閾值（%）---
-END_IDOL_TH   = 90    # > 90% → 偶像（結局1）
-END_OFFICE_TH = 30    # 30%~90% → 上班族（結局2）；< 30% → 海賊（結局3）
+# --- 結局：互動率（rhythm_rate）分支閾值（%）---
+# 結局類別與角色解耦：只定義 好 / 普通 / 壞 / 離家出走 四種，
+# 未來換遊戲只需替換對應素材（end_good / end_normal / end_bad / end_runaway）。
+END_GOOD_TH   = 90    # > 90%      → 好結局（end_good）
+END_NORMAL_TH = 30    # 30%~90%    → 普通結局（end_normal）；< 30% → 壞結局（end_bad）
 
 # --- 狀態 ID（狀態機用字串當鍵，可讀性高、易擴充）---
 STATE_INIT        = "init"          # 初始化 / 重置（蛋裂開）

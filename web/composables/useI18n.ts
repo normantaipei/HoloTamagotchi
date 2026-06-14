@@ -4,7 +4,7 @@
 // 全站一起重繪。t(key, params) 從 messages 取字串，找不到時退回 en、再退回 key 本身。
 //
 // 注意：模擬器「螢幕內」（320×240 canvas）畫出來的字（Nom nom… / Pet the head! /
-// ENDING: IDOL …）刻意維持英文 —— 那是真機 device 顯示的字串，翻譯會失真，故不納入。
+// ENDING: GOOD END …）刻意維持英文 —— 那是真機 device 顯示的字串，翻譯會失真，故不納入。
 
 import { ref } from 'vue'
 
@@ -105,9 +105,9 @@ const messages: Record<Locale, Dict> = {
     'sprite.pet': '摸頭',
     'sprite.eat': '咀嚼',
     'sprite.sleep': '睡覺',
-    'sprite.end_idol': '偶像',
-    'sprite.end_office': '上班族',
-    'sprite.end_pirate': '海賊',
+    'sprite.end_good': '好結局',
+    'sprite.end_normal': '普通結局',
+    'sprite.end_bad': '壞結局',
     'sprite.end_runaway': '離家出走',
     'sprite.emo_success': '成功',
     'sprite.emo_fail': '失敗',
@@ -127,10 +127,10 @@ const messages: Record<Locale, Dict> = {
     'desc.pet': '摸頭時的開心表情',
     'desc.eat': '嚼食（餵食時一口一口咬）',
     'desc.sleep': '蓋被子睡覺（2 幀呼吸輪播）',
-    'desc.end_idol': '偶像結局（音遊率 > 90%）',
-    'desc.end_office': '上班族結局（音遊率 30~90%）',
-    'desc.end_pirate': '海賊結局（音遊率 < 30%）',
-    'desc.end_runaway': '離家出走（壞結局，飽食度歸零）',
+    'desc.end_good': '好結局（互動率 > 90%）',
+    'desc.end_normal': '普通結局（互動率 30~90%）',
+    'desc.end_bad': '壞結局（互動率 < 30%）',
+    'desc.end_runaway': '離家出走（飽食度歸零）',
     'desc.emo_success': '成功（時間內摸滿親密度條）',
     'desc.emo_fail': '失敗（時間到沒摸滿）',
     'desc.food_0': '蛋糕',
@@ -147,9 +147,9 @@ const messages: Record<Locale, Dict> = {
     'food.food_4': '百匯',
 
     // 結局 picker（ENDINGS）
-    'ending.idol': '偶像',
-    'ending.office': '上班族',
-    'ending.pirate': '海賊',
+    'ending.good': '好結局',
+    'ending.normal': '普通結局',
+    'ending.bad': '壞結局',
     'ending.runaway': '離家出走',
 
     // 結算 picker（GRADES）
@@ -265,9 +265,9 @@ const messages: Record<Locale, Dict> = {
     'sprite.pet': 'Pet',
     'sprite.eat': 'Eat',
     'sprite.sleep': 'Sleep',
-    'sprite.end_idol': 'Idol',
-    'sprite.end_office': 'Office',
-    'sprite.end_pirate': 'Pirate',
+    'sprite.end_good': 'Good end',
+    'sprite.end_normal': 'Normal end',
+    'sprite.end_bad': 'Bad end',
     'sprite.end_runaway': 'Run away',
     'sprite.emo_success': 'Success',
     'sprite.emo_fail': 'Fail',
@@ -287,10 +287,10 @@ const messages: Record<Locale, Dict> = {
     'desc.pet': 'Happy face while being petted',
     'desc.eat': 'Chewing (bite by bite while feeding)',
     'desc.sleep': 'Sleeping under covers (2-frame breathing loop)',
-    'desc.end_idol': 'Idol ending (rhythm rate > 90%)',
-    'desc.end_office': 'Office worker ending (rhythm 30–90%)',
-    'desc.end_pirate': 'Pirate ending (rhythm rate < 30%)',
-    'desc.end_runaway': 'Run away (bad ending, hunger hits zero)',
+    'desc.end_good': 'Good ending (interaction rate > 90%)',
+    'desc.end_normal': 'Normal ending (interaction rate 30–90%)',
+    'desc.end_bad': 'Bad ending (interaction rate < 30%)',
+    'desc.end_runaway': 'Run away (hunger hits zero)',
     'desc.emo_success': 'Success (filled the affection bar in time)',
     'desc.emo_fail': 'Fail (ran out of time)',
     'desc.food_0': 'Cake',
@@ -307,9 +307,9 @@ const messages: Record<Locale, Dict> = {
     'food.food_4': 'Parfait',
 
     // ending picker (ENDINGS)
-    'ending.idol': 'Idol',
-    'ending.office': 'Office Worker',
-    'ending.pirate': 'Pirate',
+    'ending.good': 'Good End',
+    'ending.normal': 'Normal End',
+    'ending.bad': 'Bad End',
     'ending.runaway': 'Run Away',
 
     // grade picker (GRADES)

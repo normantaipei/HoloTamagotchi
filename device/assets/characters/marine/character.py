@@ -41,11 +41,11 @@ SPRITES = {
     # 背景
     "bg_room":      (0x2A1020, "BG: Normal Room", 320, 240),
     "bg_game":      (0x0C1828, "BG: Game Room",   320, 240),
-    # 結局圖（4 種，150×150 統一畫布）
-    "end_idol":     (0xFFD24A, "END: Idol",      CHAR_W, CHAR_H),
-    "end_office":   (0x6A86C0, "END: Office",    CHAR_W, CHAR_H),
-    "end_pirate":   (0x9A3A3A, "END: Pirate",    CHAR_W, CHAR_H),
-    "end_runaway":  (0x404048, "END: Run away",  CHAR_W, CHAR_H),
+    # 結局圖（4 類，150×150 統一畫布）。key 為通用類別，marine 各自對應自己的角色圖。
+    "end_good":     (0xFFD24A, "END: Good (Idol)",     CHAR_W, CHAR_H),
+    "end_normal":   (0x6A86C0, "END: Normal (Office)",  CHAR_W, CHAR_H),
+    "end_bad":      (0x9A3A3A, "END: Bad (Pirate)",     CHAR_W, CHAR_H),
+    "end_runaway":  (0x404048, "END: Run away",         CHAR_W, CHAR_H),
     # 摸頭遊戲結算情緒圖（成功 / 失敗 2 張，150×150 統一畫布）
     "emo_success":  (0xFFD24A, "EMO: Success",   CHAR_W, CHAR_H),
     "emo_fail":     (0x9A6A6A, "EMO: Fail",      CHAR_W, CHAR_H),
@@ -63,7 +63,7 @@ IMAGES = {
     # "bg_room":   "backgrounds/room.jpg",
     # "bg_game":   "backgrounds/game_room.jpg",
     # "idle":      "anim/idle_00.jpg",
-    # "end_idol":  "portraits/idol.jpg",
+    # "end_good":  "portraits/idol.jpg",
     # "food_0":    "food/cake.jpg",
 }
 
