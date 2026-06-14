@@ -7,6 +7,7 @@
 #include "config.h"
 #include "Metrics.h"
 #include "AssetManager.h"
+#include "AssetStore.h"
 
 // IMU 一次讀數：加速度大小(g) + 角速度大小(°/s)。ok=false 表示 IMU 不可用 / 讀取失敗。
 struct ImuMotion { bool ok; float amag; float gmag; };
@@ -16,6 +17,7 @@ public:
     M5Canvas*    canvas = nullptr;
     Metrics      metrics;
     AssetManager assets;
+    AssetStore   assetStore;               // LittleFS 素材載入（開機填 assets）
     bool         imuOk = false;            // IMU 是否可用（搖一搖 / 動作偵測據此）
     EndingKind   endingKind = EndingKind::None;
 

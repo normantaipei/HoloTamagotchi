@@ -15,6 +15,13 @@ public:
     void setCanvas(M5Canvas* canvas) { canvas_ = canvas; }
     void setCharacter(const char* characterId);
 
+    // 注入 runtime 圖片清單（由 AssetStore 從 LittleFS 載入後呼叫）。
+    // 未注入（或 count=0）→ 一律走佔位色塊/寵物臉，邏輯照常運行。
+    void setImages(const assets::ImageAsset* imgs, int count) {
+        images_ = imgs;
+        image_count_ = count;
+    }
+
     // 目前動畫幀計數（由主迴圈每幀設定，狀態切換時歸零）。多幀素材據此輪播：
     // 顯示幀 = (frame / ANIM_FRAME_HOLD) % 幀數，與 web 模擬器一致。
     void setFrame(int f) { frame_ = f; }
@@ -22,7 +29,7 @@ public:
     // 主題色（"bg"/"primary"/"accent"）→ RGB565；未知回 config::DARK。
     uint16_t color(const char* name) const;
 
-    // 這個 key 是否已有可用圖片（美術放好圖且編進韌體）。
+    // 這個 key 是否已有可用圖片（LittleFS 有載到該資產）。
     bool hasImage(const char* key) const;
 
     // 畫一個資源。x/y<0 表示用 manifest 預設尺寸並置中；w/h<0 用預設尺寸。
@@ -33,6 +40,8 @@ public:
 private:
     M5Canvas* canvas_;
     const assets::Character* char_;
+    const assets::ImageAsset* images_ = nullptr;   // runtime 圖片清單（AssetStore 注入）
+    int image_count_ = 0;
     int frame_ = 0;
 
     const assets::Sprite*     findSprite(const char* key) const;

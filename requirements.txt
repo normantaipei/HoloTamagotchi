@@ -1,6 +1,0 @@
-# 開發工具依賴。安裝：.venv/bin/python -m pip install -r requirements.txt
-mpremote==1.28.0
-
-# 以下為 mpremote 的相依套件（pip 會自動裝，列出以鎖定版本）
-platformdirs==4.4.0
-pyserial==3.5

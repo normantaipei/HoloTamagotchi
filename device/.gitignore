@@ -1,4 +1,6 @@
 # PlatformIO 建置產物 / 快取
 .pio/
+# 素材分區來源（由 tools/build_fs_assets.py 從 web/demo-assets 產生，buildfs 打包用）
+data/
 # macOS
 .DS_Store

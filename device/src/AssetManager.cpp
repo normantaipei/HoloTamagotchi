@@ -9,7 +9,7 @@
 namespace {
 
 // ─── <pet-face> 過渡視覺：把「沒有圖片」的角色色塊畫成一隻有表情的小寵物 ───
-// 美術把圖放進 manifest IMAGES 後，對應 key 走 pushImage、這裡不再觸發。
+// LittleFS 載到該 key 的圖後，對應 key 走 pushImage、這裡不再觸發。
 // 哪些 key 畫成寵物臉、對應表情；沒列到的（bg_*/food_* 等）維持色塊 + 標籤。
 struct ExprMap { const char* key; const char* expr; };
 const ExprMap PET_EXPR[] = {
@@ -38,10 +38,10 @@ const assets::Sprite* AssetManager::findSprite(const char* key) const {
 }
 
 const assets::ImageAsset* AssetManager::findImage(const char* key) const {
-    if (!char_) return nullptr;
-    for (int i = 0; i < char_->image_count; ++i)
-        if (char_->images[i].frames && std::strcmp(char_->images[i].key, key) == 0)
-            return &char_->images[i];
+    if (!images_) return nullptr;   // AssetStore 尚未注入（LittleFS 失敗）→ 走佔位
+    for (int i = 0; i < image_count_; ++i)
+        if (images_[i].frames && std::strcmp(images_[i].key, key) == 0)
+            return &images_[i];
     return nullptr;
 }
 

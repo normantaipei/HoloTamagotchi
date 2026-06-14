@@ -3,15 +3,16 @@
 // 對應原 character.py：定義「一個角色」的資料，不含遊戲邏輯。型別來自 ../character.h。
 //   THEME   : 色彩主題（0xRRGGBB）
 //   SPRITES : 每個資源的佔位色塊規格 key -> (色, 螢幕標籤, 預設寬, 預設高)
-//   IMAGES  : 每個資源對應的 raw RGB565 圖（編譯進韌體，來源 web/demo-assets）。
 //
-// 美術流程：把新 PNG 換進 web/demo-assets，跑 tools/build_assets.py 重新產生
-//           images/*.h 與 images/assets.h（MARINE_IMAGES 巨集），程式邏輯不用改。
+// 圖片(IMAGES)已不在這裡：素材改由 LittleFS 載入。
+// 美術流程：把新 PNG 換進 web/demo-assets → 跑 tools/build_fs_assets.py → pio run -t buildfs
+//           → pio run -t uploadfs。程式邏輯與本檔都不用改。
 //
 // 【統一畫布】所有「角色」一律 150x150 正方形畫布置中；食物 95x95；背景 320x240。
+// SPRITES 的 key/預設寬高/標籤是「佔位規格」，也是 draw() 沒指定尺寸時的預設尺寸來源，
+// 故仍需與素材實際尺寸一致——換尺寸時這裡與 web/demo-assets 要一起改。
 #pragma once
 #include "../character.h"
-#include "images/assets.h"   // 由 build_assets.py 產生：各圖標頭 + MARINE_IMAGES 巨集
 
 namespace assets {
 namespace marine {
@@ -41,20 +42,12 @@ inline const Sprite SPRITES[] = {
     {"food_4",      0xE07070, "Parfait", 95, 95},
 };
 
-// key -> 圖片。由 MARINE_IMAGES 巨集（images/assets.h）展開，來源 web/demo-assets。
-inline const ImageAsset IMAGES[] = {
-    MARINE_IMAGES
-    {nullptr, nullptr, 0, 0, 0, 0xFFFF},   // 佔位空項（C++ 不允許 0 長度陣列；findImage 會跳過 null）
-};
-
 inline const Character CHARACTER = {
     "Houshou Marine",
     0x2A1020,   // bg 深紅房間底
     0xF0405A,   // primary 瑪琳紅
     0xFFC857,   // accent 金
     SPRITES, (int)(sizeof(SPRITES) / sizeof(SPRITES[0])),
-    // image_count 用陣列長度；findImage 以 data!=null 過濾佔位空項，故安全。
-    IMAGES,  (int)(sizeof(IMAGES) / sizeof(IMAGES[0])),
 };
 
 }  // namespace marine

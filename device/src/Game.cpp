@@ -10,6 +10,15 @@ void Game::begin(M5Canvas* cv) {
     canvas = cv;
     assets.setCanvas(cv);
     assets.setCharacter(config::DEFAULT_CHARACTER);
+
+    // 素材：開機從 LittleFS 分區載入 PSRAM，再注入 AssetManager。
+    // 失敗（未燒素材分區 / 掛載失敗）→ 不注入，全程走佔位色塊，遊戲流程照常可測。
+    if (assetStore.begin() && assetStore.load(config::DEFAULT_CHARACTER)) {
+        assets.setImages(assetStore.images(), assetStore.count());
+    } else {
+        Serial.println("[Game] 素材不可用 → 佔位模式（請先 pio run -t uploadfs）");
+    }
+
     // IMU：dev::SKIP_IMU 可強制停用；否則看 M5Unified 是否成功初始化內建 MPU6886。
     imuOk = !dev::SKIP_IMU && (M5.Imu.isEnabled());
 }
