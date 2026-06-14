@@ -40,7 +40,6 @@ SPRITES = {
     "sleep":        (0x405080, "ANIM: Sleep",   CHAR_W, CHAR_H),
     # 背景
     "bg_room":      (0x2A1020, "BG: Normal Room", 320, 240),
-    "bg_game":      (0x0C1828, "BG: Game Room",   320, 240),
     # 結局圖（4 類，150×150 統一畫布）。key 為通用類別，marine 各自對應自己的角色圖。
     "end_good":     (0xFFD24A, "END: Good (Idol)",     CHAR_W, CHAR_H),
     "end_normal":   (0x6A86C0, "END: Normal (Office)",  CHAR_W, CHAR_H),
@@ -61,7 +60,6 @@ SPRITES = {
 # 目前留空 → 全部走佔位色塊。美術放好圖後，把對應行取消註解並改檔名即可。
 IMAGES = {
     # "bg_room":   "backgrounds/room.jpg",
-    # "bg_game":   "backgrounds/game_room.jpg",
     # "idle":      "anim/idle_00.jpg",
     # "end_good":  "portraits/idol.jpg",
     # "food_0":    "food/cake.jpg",

@@ -97,7 +97,6 @@ const messages: Record<Locale, Dict> = {
 
     // 部件標籤（SPRITES label）
     'sprite.bg_room': '房間背景',
-    'sprite.bg_game': '遊戲房間',
     'sprite.egg': '蛋',
     'sprite.idle': '待機',
     'sprite.yawn': '哈欠',
@@ -119,7 +118,6 @@ const messages: Record<Locale, Dict> = {
 
     // 部件說明（SPRITES desc）
     'desc.bg_room': '普通房間背景（待機 / 餵食 / 摸頭都在這）',
-    'desc.bg_game': '遊戲房間背景（唱跳用）',
     'desc.egg': '蛋（破殼初始化動畫，會隨進度放大）',
     'desc.idle': '待機（最常出現，是門面）',
     'desc.yawn': '打哈欠（疲勞高時隨機觸發）',
@@ -257,7 +255,6 @@ const messages: Record<Locale, Dict> = {
 
     // part labels (SPRITES label)
     'sprite.bg_room': 'Normal Room',
-    'sprite.bg_game': 'Game Room',
     'sprite.egg': 'Egg',
     'sprite.idle': 'Idle',
     'sprite.yawn': 'Yawn',
@@ -279,7 +276,6 @@ const messages: Record<Locale, Dict> = {
 
     // part descriptions (SPRITES desc)
     'desc.bg_room': 'Normal room background (idle / feeding / petting)',
-    'desc.bg_game': 'Game room background (for performing)',
     'desc.egg': 'Egg (hatching intro, scales up with progress)',
     'desc.idle': 'Idle (most frequent — the face of the app)',
     'desc.yawn': 'Yawn (random when tired)',

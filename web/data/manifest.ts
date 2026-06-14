@@ -52,7 +52,6 @@ const CHAR_H = 150
 export const SPRITES: Record<string, SpriteSpec> = {
   // --- 背景 ---
   bg_room: { key: 'bg_room', color: '#2A1020', label: 'BG: Normal Room', w: 320, h: 240, folder: 'backgrounds', suggested: 'room.jpg', category: 'background', desc: '普通房間背景（待機 / 餵食 / 摸頭都在這）' },
-  bg_game: { key: 'bg_game', color: '#0C1828', label: 'BG: Game Room', w: 320, h: 240, folder: 'backgrounds', suggested: 'game_room.jpg', category: 'background', desc: '遊戲房間背景（唱跳用）' },
   // --- 動作 / 待機（皆 150×150 統一畫布）---
   egg: { key: 'egg', color: '#F0E6C8', label: 'Egg', w: CHAR_W, h: CHAR_H, folder: 'anim', suggested: 'egg.jpg', category: 'anim', desc: '蛋（破殼初始化動畫，會隨進度放大）' },
   idle: { key: 'idle', color: '#F0405A', label: 'Marine idle', w: CHAR_W, h: CHAR_H, folder: 'anim', suggested: 'idle_00.jpg', category: 'anim', desc: '待機（最常出現，是門面）' },
@@ -79,7 +78,7 @@ export const SPRITES: Record<string, SpriteSpec> = {
 
 // 給上傳面板分組用。
 export const CATEGORIES: { id: SpriteSpec['category']; label: string; keys: string[] }[] = [
-  { id: 'background', label: '背景 Backgrounds', keys: ['bg_room', 'bg_game'] },
+  { id: 'background', label: '背景 Backgrounds', keys: ['bg_room'] },
   { id: 'anim', label: '動作 Animations', keys: ['egg', 'idle', 'yawn', 'cheer', 'pet', 'eat', 'sleep'] },
   { id: 'ending', label: '結局 Endings', keys: ['end_good', 'end_normal', 'end_bad', 'end_runaway'] },
   { id: 'emotion', label: '摸頭結算 Emotions', keys: ['emo_success', 'emo_fail'] },
@@ -151,7 +150,7 @@ export const EDIT_GROUPS: EditGroup[] = [
   { id: 'egg', label: 'Egg 破殼', parts: ['egg'], actionId: 'egg' },
   { id: 'ending', label: 'Ending 結局', parts: ['end_good', 'end_normal', 'end_bad', 'end_runaway'], actionId: 'ending', partType: 'ending' },
   { id: 'result', label: 'Result 結算', parts: ['emo_success', 'emo_fail'], actionId: 'result', partType: 'grade' },
-  { id: 'bg', label: 'BG 背景', parts: ['bg_room', 'bg_game'], actionId: null },
+  { id: 'bg', label: 'BG 背景', parts: ['bg_room'], actionId: null },
 ]
 
 // 對話字串（assets/strings/en.py），對話泡泡用。
