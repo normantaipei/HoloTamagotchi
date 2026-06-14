@@ -26,8 +26,10 @@ BITE_FRAMES = 9                                        # 每一口的幀數（�
 END_PAD = 6                                            # 吃完後的小停頓
 EAT_FRAMES = BITES * BITE_FRAMES + END_PAD             # ~2.1s
 
-CHEW_DIP = 8                                           # 咀嚼時角色上下點頭幅度（px）
-CHAR_CLEAR = (EAT_X, EAT_Y, EAT_W, EAT_H + CHEW_DIP)   # 角色重畫前要清掉的範圍（含點頭）
+CHEW_DIP = 0                                           # 角色上下點頭幅度（px）。
+# 設 0：關閉「每幀點頭」。點頭讓每一幀的畫面簽章都不同 → 每幀重畫（重新解碼）角色 PNG，
+# 是餵食動畫卡頓的主因。關掉後角色只在「咬一口、食物大小改變」時才重畫，順很多。
+CHAR_CLEAR = (EAT_X, EAT_Y, EAT_W, EAT_H + CHEW_DIP)   # 角色重畫前要清掉的範圍
 
 
 class Feeding(State):
@@ -115,14 +117,20 @@ class Feeding(State):
             return
         self._sig = sig
         g = self.game
-        bg = g.assets.color("bg")
-        # 清掉上一格食物殘影 + 角色區（含點頭幅度），再依序重畫。
-        if self._food_rect:
-            fx, fy, fw, fh = self._food_rect
-            g.lcd.fillRect(fx, fy, fw, fh, bg)
-        ccx, ccy, ccw, cch = CHAR_CLEAR
-        g.lcd.fillRect(ccx, ccy, ccw, cch, bg)
-        g.assets.draw("eat", EAT_X, EAT_Y + cdy, EAT_W, EAT_H)   # 角色（咀嚼時低頭）
+        # 還原背景，再依序重畫角色 + 食物。
+        # 有真實背景圖：lcd 沒有「只重貼一塊」的裁切 API，去背角色/食物又不能用純色清
+        #   （會在背景圖上留色塊），只能整張背景重貼。
+        # 純色背景：只清「上一格食物殘影 + 角色區」即可，便宜。
+        if g.assets.has_image("bg_room"):
+            g.assets.draw("bg_room", 0, 0)
+        else:
+            bg = g.assets.color("bg")
+            if self._food_rect:
+                fx, fy, fw, fh = self._food_rect
+                g.lcd.fillRect(fx, fy, fw, fh, bg)
+            ccx, ccy, ccw, cch = CHAR_CLEAR
+            g.lcd.fillRect(ccx, ccy, ccw, cch, bg)
+        g.assets.draw("eat", EAT_X, EAT_Y + cdy, EAT_W, EAT_H)   # 角色
         if size > 0:
             x, y = cx - size // 2, cy - size // 2
             g.assets.draw(self._food_key, x, y, size, size, show_label=False)  # 無標籤

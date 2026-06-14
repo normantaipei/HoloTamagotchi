@@ -63,8 +63,22 @@ class NormalRoom(State):
             self.hints.draw(c=i18n.get("btn_menu"))          # C：開選單
 
     def _bg_fill(self, x, y, w, h):
-        # 用背景色清掉一塊（移除動態元件）。目前背景為純色塊；之後接背景圖再優化成重貼圖。
+        # 用背景色清掉一塊（移除動態元件）。純色背景時這樣就夠。
         self.game.lcd.fillRect(x, y, w, h, self.game.assets.color("bg"))
+
+    def _clear_sprite(self):
+        """清掉角色圖那塊，準備重畫新圖（角色圖是去背的，不先清會留殘影）。
+
+        有真實背景圖時：lcd 沒有「只重貼一塊」的裁切 API，只能整張背景重貼，
+        並回傳 True 通知呼叫端：選單 / 提示列等前景元件要一起補畫。
+        純色背景時：只清角色那塊即可，回傳 False。
+        """
+        g = self.game
+        if g.assets.has_image("bg_room"):
+            g.assets.draw("bg_room", 0, 0)
+            return True
+        self._bg_fill(SPR_X, SPR_Y, SPR_W, SPR_H)
+        return False
 
     def update(self):
         g = self.game
@@ -145,11 +159,17 @@ class NormalRoom(State):
         key = self.event[0] if self.event else "idle"
         sprite_redrawn = False
         if key != self._cur_sprite:
+            # 先清掉舊角色圖再畫新圖，否則去背新圖會疊在舊圖上留殘影。
+            full_redraw = self._clear_sprite()
             g.assets.draw(key, SPR_X, SPR_Y, SPR_W, SPR_H)
             if key == "cheer":
                 self.dialog.show("cheer_msg_01")
             self._cur_sprite = key
             sprite_redrawn = True
+            # 整張背景被重貼過 → 強制選單 / 提示列補畫（下方依簽章判斷會重畫）。
+            if full_redraw:
+                self._menu_sig = None
+                self._hint_open = None
 
         # 事件倒數結束 → 清掉對話筐（角色圖下一輪會換回 idle 蓋掉事件圖）
         if self.event:

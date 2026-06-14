@@ -23,14 +23,17 @@ class InitState(State):
     def update(self):
         g = self.game
         frac = self.t / float(ANIM_FRAMES)
-        # 蛋維持正方形成長（90→150），最終填滿統一 150×150 畫布
-        w = h = int(90 + frac * 60)
-        # 只清蛋的最大包圍框（置中），不每幀清整片螢幕
         cx, cy = config.SCREEN_W // 2, config.SCREEN_H // 2
-        g.lcd.fillRect(cx - MAXW // 2, cy - MAXH // 2, MAXW, MAXH, config.BLACK)
-        g.assets.draw("egg", w=w, h=h)
-        # 佔位進度字：美術放好蛋的動畫圖後自動關掉，可把破殼效果直接畫進素材裡。
-        if not g.assets.has_image("egg"):
+        if g.assets.has_image("egg"):
+            # 真實蛋圖：lcd.image 不縮放（忽略 w/h），逐幀重畫只是把同一張 PNG 重新解碼
+            # 24 次、徒增卡頓且看不出成長。改成只畫一次、靜置等動畫時間到。
+            if self.t == 0:
+                g.assets.draw("egg")
+        else:
+            # 佔位色塊：fillRect 會吃 w/h，所以維持「正方形成長 90→150」的破蛋動畫。
+            w = h = int(90 + frac * 60)
+            g.lcd.fillRect(cx - MAXW // 2, cy - MAXH // 2, MAXW, MAXH, config.BLACK)
+            g.assets.draw("egg", w=w, h=h)
             g.lcd.font(g.lcd.FONT_DefaultSmall)
             g.lcd.fillRect(60, 220, 200, 16, config.BLACK)
             g.lcd.print("[ANIM: Egg cracking %d%%]" % int(frac * 100), 70, 222, config.WHITE)

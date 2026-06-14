@@ -93,11 +93,19 @@ class Petting(State):
             self._draw_hand(d, bg)
             self._hand_dir = d
 
-        # 角色表情：被摸時開心，否則待機；只在 key 改變時重畫。
-        key = "pet" if self.react > 0 else "idle"
-        if key != self._cur_sprite:
-            g.assets.draw(key, SPR_X, SPR_Y, SPR_W, SPR_H)
-            self._cur_sprite = key
+        # 角色表情：被摸時開心、否則待機。
+        # 有真實角色圖時：切表情得先清掉舊去背圖；無裁切 API 下那等於整張背景重貼，
+        #   逐下摸都重貼代價太大 → 全程固定一張，靠親密度條 / 愛心回饋。
+        #   佔位圖（純色 / 圓角塊）才逐下切表情，清除便宜、不卡。
+        if not g.assets.has_image("pet"):
+            key = "pet" if self.react > 0 else "idle"
+            if key != self._cur_sprite:
+                lcd.fillRect(SPR_X, SPR_Y, SPR_W, SPR_H, bg)   # 先清舊圖避免殘影
+                g.assets.draw(key, SPR_X, SPR_Y, SPR_W, SPR_H)
+                self._cur_sprite = key
+        elif self._cur_sprite is None:
+            g.assets.draw("idle", SPR_X, SPR_Y, SPR_W, SPR_H)  # 真實圖只畫一次
+            self._cur_sprite = "idle"
 
         # 愛心：開心反應期間顯示，結束擦掉（只在切換時重畫）。美術放圖後關掉。
         show = self._show_deco and self.react > 0
