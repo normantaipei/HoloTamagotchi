@@ -1,0 +1,4 @@
+# PlatformIO 建置產物 / 快取
+.pio/
+# macOS
+.DS_Store
