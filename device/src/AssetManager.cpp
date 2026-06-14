@@ -71,12 +71,17 @@ void AssetManager::draw(const char* key, int x, int y, int w, int h, bool showLa
     if (y < 0) y = (config::SCREEN_H - h) / 2;
 
     // 1) 有對應圖片就畫圖片（raw RGB565，整塊一次貼到 canvas）。
+    //    pushImage 無法縮放，故圖片以原生尺寸「置中對齊」到呼叫端指定的 (x,y,w,h) 方框：
+    //    方框 == 圖片尺寸時等同貼左上角；方框會變動時（如餵食動畫的食物）圖片中心仍維持
+    //    在方框中心、不會因 size 改變而飄移。
     const assets::ImageAsset* img = findImage(key);
     if (img) {
+        int ix = x + (w - img->w) / 2;
+        int iy = y + (h - img->h) / 2;
         if (img->transp == 0xFFFF)
-            canvas_->pushImage(x, y, img->w, img->h, img->data);
+            canvas_->pushImage(ix, iy, img->w, img->h, img->data);
         else
-            canvas_->pushImage(x, y, img->w, img->h, img->data, img->transp);
+            canvas_->pushImage(ix, iy, img->w, img->h, img->data, img->transp);
         return;
     }
     // 2) 否則畫佔位。角色類 key 畫寵物臉，其餘色塊 + 標籤。
