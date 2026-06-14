@@ -81,10 +81,12 @@ void setup() {
 }
 
 void loop() {
+    static int stateFrame = 0;              // 本狀態已過幀數（切換時歸零）；驅動多幀素材輪播
     uint32_t t0 = millis();                 // 幀率對齊：量測本幀工作耗時
 
     M5.update();                            // 更新按鍵 / 觸控狀態（每圈一次）
 
+    game.assets.setFrame(stateFrame);       // 多幀素材依此輪播（對應 web renderer.frame）
     StateId nxt = current->update();        // 邏輯 + 把整張畫面畫進 canvas
 
     if (config::DEV) game.drawDebugOverlay(currentId);
@@ -96,11 +98,12 @@ void loop() {
         currentId = nxt;
         current = states[(int)currentId];
         current->onEnter();
+        stateFrame = 0;                     // 新狀態從第 0 幀開始（與 web 每動作重置一致）
         Serial.printf("-> state %s\n", stateName(currentId));
+    } else {
+        stateFrame++;
     }
 
-    // 幀率對齊：補足到 FRAME_MS（含繪圖 + pushSprite 的耗時），固定 ~20fps，
-    // 與 web 模擬器一致。原本「無條件 delay(FRAME_MS)」會變成「工作 + 50ms」→ 偏慢。
     // 幀率對齊：補足到 FRAME_MS（含繪圖 + pushSprite 耗時），固定步調、與 web 模擬器一致。
     // （原本「無條件 delay(FRAME_MS)」= 工作 + 50ms，會明顯偏慢。）
     uint32_t elapsed = millis() - t0;

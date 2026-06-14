@@ -15,6 +15,10 @@ public:
     void setCanvas(M5Canvas* canvas) { canvas_ = canvas; }
     void setCharacter(const char* characterId);
 
+    // 目前動畫幀計數（由主迴圈每幀設定，狀態切換時歸零）。多幀素材據此輪播：
+    // 顯示幀 = (frame / ANIM_FRAME_HOLD) % 幀數，與 web 模擬器一致。
+    void setFrame(int f) { frame_ = f; }
+
     // 主題色（"bg"/"primary"/"accent"）→ RGB565；未知回 config::DARK。
     uint16_t color(const char* name) const;
 
@@ -29,6 +33,7 @@ public:
 private:
     M5Canvas* canvas_;
     const assets::Character* char_;
+    int frame_ = 0;
 
     const assets::Sprite*     findSprite(const char* key) const;
     const assets::ImageAsset* findImage(const char* key) const;

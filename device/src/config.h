@@ -16,6 +16,7 @@ constexpr int SCREEN_W = 320;
 constexpr int SCREEN_H = 240;
 constexpr int FRAME_MS = 50;                       // 主迴圈每幀間隔（~20fps）
 constexpr int TICKS_PER_SEC = 1000 / FRAME_MS;     // 幾幀算一秒
+constexpr int ANIM_FRAME_HOLD = 5;                 // 多幀素材每張顯示幾幀（5 → ~4fps 輪播，與 web 一致）
 
 // --- 預設角色 / 語言 ---
 constexpr const char* DEFAULT_CHARACTER = "marine";

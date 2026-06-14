@@ -16,13 +16,15 @@ struct Sprite {
     int         h;
 };
 
-// 圖片資源：key -> raw RGB565 資料 + 尺寸 + 透明色鍵（去背）。
+// 圖片資源：key -> 多幀 raw RGB565 資料 + 尺寸 + 透明色鍵（去背）。
+// frames 指向各幀資料的指標陣列；單張素材 frame_count=1。各幀共用 w/h。
 struct ImageAsset {
-    const char*     key;
-    const uint16_t* data;   // 長度 = w*h
-    int             w;
-    int             h;
-    uint16_t        transp; // 透明色鍵（該色像素不畫）；0xFFFF = 不透明
+    const char*            key;
+    const uint16_t* const* frames;      // frames[i] 長度 = w*h
+    int                    frame_count;
+    int                    w;
+    int                    h;
+    uint16_t               transp;      // 透明色鍵（該色像素不畫）；0xFFFF = 不透明
 };
 
 struct Character {

@@ -44,7 +44,7 @@ inline const Sprite SPRITES[] = {
 // key -> 圖片。由 MARINE_IMAGES 巨集（images/assets.h）展開，來源 web/demo-assets。
 inline const ImageAsset IMAGES[] = {
     MARINE_IMAGES
-    {nullptr, nullptr, 0, 0, 0xFFFF},   // 佔位空項（C++ 不允許 0 長度陣列；findImage 會跳過 null）
+    {nullptr, nullptr, 0, 0, 0, 0xFFFF},   // 佔位空項（C++ 不允許 0 長度陣列；findImage 會跳過 null）
 };
 
 inline const Character CHARACTER = {

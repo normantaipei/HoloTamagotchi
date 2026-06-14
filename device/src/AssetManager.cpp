@@ -40,7 +40,7 @@ const assets::Sprite* AssetManager::findSprite(const char* key) const {
 const assets::ImageAsset* AssetManager::findImage(const char* key) const {
     if (!char_) return nullptr;
     for (int i = 0; i < char_->image_count; ++i)
-        if (char_->images[i].data && std::strcmp(char_->images[i].key, key) == 0)
+        if (char_->images[i].frames && std::strcmp(char_->images[i].key, key) == 0)
             return &char_->images[i];
     return nullptr;
 }
@@ -73,12 +73,16 @@ void AssetManager::draw(const char* key, int x, int y, int w, int h, bool showLa
     // 1) 有對應圖片就畫圖片（raw RGB565，整塊一次貼到 canvas），一律以方框中心對齊。
     const assets::ImageAsset* img = findImage(key);
     if (img) {
+        // 多幀輪播：顯示幀 = (frame / HOLD) % 幀數（與 web 模擬器 pickImage 一致）。
+        int idx = img->frame_count > 1
+                      ? (frame_ / config::ANIM_FRAME_HOLD) % img->frame_count : 0;
+        const uint16_t* data = img->frames[idx];
         if (w == img->w && h == img->h) {
             // 尺寸相符：直接貼（最快、最銳利）；置中對齊此時等同貼左上角。
             int ix = x + (w - img->w) / 2;
             int iy = y + (h - img->h) / 2;
-            if (img->transp == 0xFFFF) canvas_->pushImage(ix, iy, img->w, img->h, img->data);
-            else canvas_->pushImage(ix, iy, img->w, img->h, img->data, img->transp);
+            if (img->transp == 0xFFFF) canvas_->pushImage(ix, iy, img->w, img->h, data);
+            else canvas_->pushImage(ix, iy, img->w, img->h, data, img->transp);
         } else {
             // 尺寸不同：以方框中心為基準縮放（餵食食物縮小、破殼蛋長大）。
             // pushImageRotateZoom 用最近鄰取樣，邊緣會略鋸齒、但透明色鍵仍精確比對（去背正常）。
@@ -86,10 +90,10 @@ void AssetManager::draw(const char* key, int x, int y, int w, int h, bool showLa
             float cx = x + w / 2.0f, cy = y + h / 2.0f;
             if (img->transp == 0xFFFF)
                 canvas_->pushImageRotateZoom(cx, cy, img->w / 2.0f, img->h / 2.0f,
-                                             0.0f, zx, zy, img->w, img->h, img->data);
+                                             0.0f, zx, zy, img->w, img->h, data);
             else
                 canvas_->pushImageRotateZoom(cx, cy, img->w / 2.0f, img->h / 2.0f,
-                                             0.0f, zx, zy, img->w, img->h, img->data, img->transp);
+                                             0.0f, zx, zy, img->w, img->h, data, img->transp);
         }
         return;
     }
