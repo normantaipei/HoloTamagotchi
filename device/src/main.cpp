@@ -50,6 +50,10 @@ void setup() {
     // 建立 canvas（PSRAM）。Fire 有 4MB PSRAM，足以容納 320x240x16bpp。
     canvas.setColorDepth(16);
     canvas.setPsram(true);
+    // 我們的圖片陣列是「原生位元組順序」的 RGB565（build_assets.py 產生），
+    // 而 M5GFX pushImage 預設把影像資料當成 swapped；不開這個就會顏色暖↔冷反轉
+    // （看起來像負片）。開了之後 pushImage 才會正確解讀我們的資料。
+    canvas.setSwapBytes(true);
     if (!canvas.createSprite(config::SCREEN_W, config::SCREEN_H)) {
         // 萬一 PSRAM 配置失敗：面板直接報錯，方便上板診斷。
         M5.Display.fillScreen(TFT_RED);
