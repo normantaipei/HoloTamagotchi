@@ -20,6 +20,9 @@ const props = defineProps<{
   scale: number
 }>()
 
+// 模擬器無真實電池，固定展示值（與真機右上角電量指示對齊位置 / 樣式）。
+const BATTERY_DEMO_LEVEL = 80
+
 const frame = defineModel<number>('frame', { default: 0 })
 
 const store = useAssetStore()
@@ -52,6 +55,9 @@ function draw() {
   // 清成黑底再交給動作腳本（多數 state 自己會鋪滿背景）。
   renderer.clear('#000000')
   props.action.render(renderer, props.opts)
+  // 電量指示：對齊真機——main loop 在每個 state 畫完後固定疊右上角電池。
+  // 模擬器無真硬體，用固定展示值（80%、非充電）。
+  renderer.battery(BATTERY_DEMO_LEVEL, false)
 
   const vctx = canvas.value.getContext('2d')!
   vctx.imageSmoothingEnabled = false

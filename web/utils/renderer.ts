@@ -233,6 +233,45 @@ export class Renderer {
     }
   }
 
+  // 右上角電量指示（對應 device/Game.cpp 的 drawBattery）。
+  // level：0~100；charging：是否充電中。模擬器無真硬體，展示值由呼叫端給。
+  battery(level: number, charging: boolean) {
+    const BW = 24, BH = 12, NUB_W = 2, NUB_H = 6, PAD = 4
+    const x = 320 - PAD - NUB_W - BW   // 本體左上 x = 290
+    const y = PAD                       // 本體左上 y = 4
+    const lv = Math.max(0, Math.min(100, Math.round(level)))
+
+    // 依電量分色：>50 綠、>20 黃、其餘紅；充電中固定亮天藍（pink=ACCENT）。
+    const fill = charging ? C.pink : lv > 50 ? C.green : lv > 20 ? C.yellow : C.red
+
+    // 外框（黑，1px 四邊）＋右側正極凸點。
+    this.fillRect(x, y, BW, 1, C.black)
+    this.fillRect(x, y + BH - 1, BW, 1, C.black)
+    this.fillRect(x, y, 1, BH, C.black)
+    this.fillRect(x + BW - 1, y, 1, BH, C.black)
+    this.fillRect(x + BW, y + (BH - NUB_H) / 2, NUB_W, NUB_H, C.black)
+
+    // 內部依百分比填色（內縮 2px 留白邊）。
+    const innerW = BW - 4
+    const fillW = Math.round((innerW * lv) / 100)
+    if (fillW > 0) this.fillRect(x + 2, y + 2, fillW, BH - 4, fill)
+
+    // 充電中：本體上疊一個小閃電。
+    if (charging) {
+      const cx = x + BW / 2, cy = y + BH / 2
+      const c = this.ctx
+      c.fillStyle = C.white
+      c.beginPath(); c.moveTo(cx + 1, cy - 4); c.lineTo(cx - 3, cy + 1); c.lineTo(cx, cy + 1); c.closePath(); c.fill()
+      c.beginPath(); c.moveTo(cx, cy - 1); c.lineTo(cx + 3, cy - 1); c.lineTo(cx - 1, cy + 4); c.closePath(); c.fill()
+    }
+
+    // 百分比數字（電池左側，右對齊，黑字）。
+    const size = 11
+    const label = `${lv}%`
+    const tw = this.textWidth(label, size)
+    this.text(label, x - 3 - tw, y + (BH - size) / 2, C.black, size)
+  }
+
   // 水平高亮選單（Menu.draw）。
   menu(labels: string[], idx: number, y = 140) {
     const n = labels.length
