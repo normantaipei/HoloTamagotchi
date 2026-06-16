@@ -66,6 +66,22 @@ pio run -t uploadfs     # 燒錄素材分區（換美術只需這步）
 pio device monitor      # 看 Serial（對應原本的 print debug）
 ```
 
+### 懶人捷徑 `./dev.sh`
+
+包一層 `python3 -m platformio`，免打一長串（本機 `pio` 不在 PATH 時尤其方便）：
+
+```bash
+cd device
+./dev.sh up      # 編譯 + 燒錄韌體 ← 改邏輯後最常用
+./dev.sh mon     # 看 Serial log
+./dev.sh dev     # 燒完直接接 monitor（up + mon 一氣呵成）
+./dev.sh build   # 只編譯不燒
+./dev.sh fs      # 換美術：buildfs + uploadfs
+./dev.sh clean   # 清 build 快取
+```
+
+不帶參數預設等同 `up`。
+
 分區表用內建 `default_16MB.csv`：app 在 `0x10000`，素材（LittleFS，label `spiffs`）在 `0xc90000`、約 3.4 MB。
 
 ---

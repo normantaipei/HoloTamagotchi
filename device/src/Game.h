@@ -28,6 +28,9 @@ public:
 
     // DEV 疊圖：螢幕最下方一行「狀態名 + 核心數值」。雙緩衝下每幀直接畫，無需簽章快取。
     void drawDebugOverlay(StateId stateId);
+
+    // 電量指示：螢幕右上角小電池圖示（綠/黃/紅＋充電閃電）。每幀疊在場景之上。
+    void drawBattery();
 };
 
 const char* stateName(StateId id);         // 狀態 ID → 顯示名（DEV 疊圖 / log 用）

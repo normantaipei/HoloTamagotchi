@@ -51,6 +51,60 @@ void Game::drawDebugOverlay(StateId stateId) {
     canvas->drawString(buf, 4, 228);
 }
 
+void Game::drawBattery() {
+    // 右上角電池圖示。M5.Power 讀數：level 0~100（-1 未知）、isCharging() 充電中。
+    int level = M5.Power.getBatteryLevel();          // 0~100，未知回 -1
+    bool charging = (M5.Power.isCharging() == m5::Power_Class::is_charging);
+
+    // 幾何（右上角，留 4px 邊距）：本體 + 右側正極小凸點。
+    constexpr int BW = 24, BH = 12, NUB_W = 2, NUB_H = 6;
+    constexpr int PAD = 4;
+    int x = config::SCREEN_W - PAD - NUB_W - BW;     // 本體左上 x
+    int y = PAD;                                      // 本體左上 y
+
+    // 未知電量：畫空殼 + 問號，不誤導。
+    if (level < 0) {
+        canvas->drawRect(x, y, BW, BH, config::BLACK);
+        canvas->fillRect(x + BW, y + (BH - NUB_H) / 2, NUB_W, NUB_H, config::BLACK);
+        canvas->setFont(&fonts::Font0);
+        canvas->setTextColor(config::BLACK);
+        canvas->setTextDatum(textdatum_t::middle_center);
+        canvas->drawString("?", x + BW / 2, y + BH / 2);
+        return;
+    }
+    if (level > 100) level = 100;
+
+    // 依電量分色：>50 綠、>20 黃、其餘紅；充電中固定亮天藍。
+    uint16_t fill = charging      ? config::ACCENT
+                  : level > 50    ? config::GREEN
+                  : level > 20    ? config::YELLOW
+                                  : config::RED;
+
+    // 外框（黑）＋右側凸點。
+    canvas->drawRect(x, y, BW, BH, config::BLACK);
+    canvas->fillRect(x + BW, y + (BH - NUB_H) / 2, NUB_W, NUB_H, config::BLACK);
+
+    // 內部依百分比填色（內縮 2px 留白邊）。
+    int innerW = BW - 4;
+    int fillW = (innerW * level + 50) / 100;         // 四捨五入
+    if (fillW > 0) canvas->fillRect(x + 2, y + 2, fillW, BH - 4, fill);
+
+    // 充電中：本體上疊一個小閃電。
+    if (charging) {
+        int cx = x + BW / 2, cy = y + BH / 2;
+        canvas->fillTriangle(cx + 1, cy - 4, cx - 3, cy + 1, cx,     cy + 1, config::WHITE);
+        canvas->fillTriangle(cx,     cy - 1, cx + 3, cy - 1, cx - 1, cy + 4, config::WHITE);
+    }
+
+    // 百分比數字（電池左側，右對齊）。
+    char buf[8];
+    std::snprintf(buf, sizeof(buf), "%d%%", level);
+    canvas->setFont(&fonts::Font0);
+    canvas->setTextColor(config::BLACK);
+    canvas->setTextDatum(textdatum_t::middle_right);
+    canvas->drawString(buf, x - 3, y + BH / 2);
+}
+
 const char* stateName(StateId id) {
     switch (id) {
         case StateId::Init:       return "init";

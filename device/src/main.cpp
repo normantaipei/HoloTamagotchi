@@ -89,6 +89,7 @@ void loop() {
     game.assets.setFrame(stateFrame);       // 多幀素材依此輪播（對應 web renderer.frame）
     StateId nxt = current->update();        // 邏輯 + 把整張畫面畫進 canvas
 
+    game.drawBattery();                     // 右上角電量指示（疊在場景之上）
     if (config::DEV) game.drawDebugOverlay(currentId);
 
     canvas.pushSprite(0, 0);                // 一次貼到面板（無掃描線）
