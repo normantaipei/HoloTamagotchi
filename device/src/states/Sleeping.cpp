@@ -15,6 +15,9 @@ void Sleeping::onEnter() {
     t_ = 0;
     shake_ = 0.0f;
     hasLast_ = false;
+    // 進睡眠當下若已精力耗盡＝「累了才睡」，才允許睡飽自然醒；
+    // 閒置打盹進來時精力幾乎是滿的，會在第 1 秒就被判定 rested 而秒醒，故排除。
+    wakeOnRested_ = game->metrics.is_exhausted();
 }
 
 bool Sleeping::updateShake() {
@@ -62,6 +65,6 @@ StateId Sleeping::update() {
         game->metrics.sleep = config::SLEEP_FULL;
         return StateId::NormalRoom;
     }
-    if (game->metrics.is_rested()) return StateId::NormalRoom;
+    if (wakeOnRested_ && game->metrics.is_rested()) return StateId::NormalRoom;
     return StateId::None;
 }

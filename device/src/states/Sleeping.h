@@ -19,6 +19,8 @@ private:
     float shake_ = 0.0f;        // 搖晃漏積分值
     float lastAmag_ = 0.0f;     // 上一幀加速度大小
     bool  hasLast_ = false;     // 首幀無前值，先不累積差分
+    bool  wakeOnRested_ = false;// 是否「累了才睡」：唯有此情況才會睡飽自然醒；
+                                // 閒置打盹（精力本來就滿）只能搖一搖 / C 鍵叫醒
 
     bool updateShake();         // 更新漏積分，回傳是否超過喚醒閾值
 };
