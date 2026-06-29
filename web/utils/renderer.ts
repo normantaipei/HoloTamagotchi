@@ -100,7 +100,18 @@ export class Renderer {
 
     const img = this.pickImage(key)
     if (img) {
-      this.ctx.drawImage(img, Math.round(dx), Math.round(dy), Math.round(dw), Math.round(dh))
+      // 等比縮放塞進方框（contain）後置中對齊，維持原圖比例不變形。
+      // 美術匯入的圖可能小於這格的統一畫布（角色 150×150、食物 95×95…）或長寬比不同，
+      // 此時依「剛好塞得下」的比例縮放；非正方形圖也不會被拉扁。
+      // 與 device/AssetManager.cpp 的 pushImageRotateZoom 等比縮放邏輯對齊。
+      const iw = img.naturalWidth || img.width
+      const ih = img.naturalHeight || img.height
+      const scale = iw && ih ? Math.min(dw / iw, dh / ih) : 1
+      const rw = iw * scale
+      const rh = ih * scale
+      const rx = dx + (dw - rw) / 2
+      const ry = dy + (dh - rh) / 2
+      this.ctx.drawImage(img, Math.round(rx), Math.round(ry), Math.round(rw), Math.round(rh))
       return
     }
     if (PET_EXPR[key]) this.pet(dx, dy, dw, dh, spec.color, PET_EXPR[key])

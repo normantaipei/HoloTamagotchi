@@ -84,16 +84,19 @@ void AssetManager::draw(const char* key, int x, int y, int w, int h, bool showLa
             if (img->transp == 0xFFFF) canvas_->pushImage(ix, iy, img->w, img->h, data);
             else canvas_->pushImage(ix, iy, img->w, img->h, data, img->transp);
         } else {
-            // 尺寸不同：以方框中心為基準縮放（餵食食物縮小、破殼蛋長大）。
+            // 尺寸不同：以方框中心為基準「等比」縮放（contain）後置中（餵食食物縮小、破殼蛋長大）。
+            // 取較小的縮放比 → 圖片剛好塞進方框、維持原比例不變形；非正方形圖也不會被拉扁。
+            // 美術匯入的圖可能小於這格的統一畫布（角色 150×150 等）或長寬比不同，此時等比縮放。
             // pushImageRotateZoom 用最近鄰取樣，邊緣會略鋸齒、但透明色鍵仍精確比對（去背正常）。
             float zx = (float)w / img->w, zy = (float)h / img->h;
+            float z = zx < zy ? zx : zy;
             float cx = x + w / 2.0f, cy = y + h / 2.0f;
             if (img->transp == 0xFFFF)
                 canvas_->pushImageRotateZoom(cx, cy, img->w / 2.0f, img->h / 2.0f,
-                                             0.0f, zx, zy, img->w, img->h, data);
+                                             0.0f, z, z, img->w, img->h, data);
             else
                 canvas_->pushImageRotateZoom(cx, cy, img->w / 2.0f, img->h / 2.0f,
-                                             0.0f, zx, zy, img->w, img->h, data, img->transp);
+                                             0.0f, z, z, img->w, img->h, data, img->transp);
         }
         return;
     }

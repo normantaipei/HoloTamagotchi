@@ -46,12 +46,21 @@ function draw() {
   const idx = Math.min(cur.value, fr.length - 1)
   const img = fr[idx]?.img
   if (!img) return
-  // 依角色尺寸比例置中（用 spec 的 w/h 維持長寬比）
+  // 外框：依 spec 長寬比置中（代表上機那一格畫布大小）。
   const ar = spec.value.w / spec.value.h
-  let dw = c.width * 0.8
-  let dh = dw / ar
-  if (dh > c.height * 0.8) { dh = c.height * 0.8; dw = dh * ar }
-  ctx.drawImage(img, (c.width - dw) / 2, (c.height - dh) / 2, dw, dh)
+  let boxW = c.width * 0.8
+  let boxH = boxW / ar
+  if (boxH > c.height * 0.8) { boxH = c.height * 0.8; boxW = boxH * ar }
+  const boxX = (c.width - boxW) / 2
+  const boxY = (c.height - boxH) / 2
+  // 圖片：在外框內等比縮放置中（contain），維持原圖比例不變形。
+  // 美術匯入的圖小於統一畫布或長寬比不同時會等比縮放——與裝置 / 模擬器一致。
+  const iw = img.naturalWidth || img.width
+  const ih = img.naturalHeight || img.height
+  const scale = iw && ih ? Math.min(boxW / iw, boxH / ih) : 1
+  const rw = iw * scale
+  const rh = ih * scale
+  ctx.drawImage(img, boxX + (boxW - rw) / 2, boxY + (boxH - rh) / 2, rw, rh)
 }
 
 function tick(now: number) {
