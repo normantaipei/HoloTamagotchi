@@ -93,6 +93,7 @@ function renderCheer(r: Renderer) {
 const EAT = { x: 85, y: 34, w: 150, h: 150 }
 const MOUTH = { x: 160, y: 124 } // EAT.x+75, EAT.y+150*3/5
 const HOLD = { x: 160, y: 158 } // 嘴下方 34px
+const FOOD_DY = -Math.round(EAT.h * 0.2) // 食物整體上移 20%（以角色 150px 高為基準 = 30px）
 const FOOD_SIZE = 95
 const BITES = 4
 const BITE_FRAMES = 9
@@ -106,9 +107,9 @@ function eatFrameState(t: number): [number, number, number, number] {
   const local = (t - 1) % BITE_FRAMES
   const sizeAfter = Math.floor((FOOD_SIZE * (BITES - i - 1)) / BITES)
   const sizeBefore = Math.floor((FOOD_SIZE * (BITES - i)) / BITES)
-  if (local === 0) return [HOLD.x, MOUTH.y, sizeBefore, CHEW_DIP]
-  if (local === 1) return [HOLD.x, MOUTH.y, sizeAfter, CHEW_DIP]
-  return [HOLD.x, HOLD.y, sizeAfter, local % 2 === 0 ? CHEW_DIP : 0]
+  if (local === 0) return [HOLD.x, MOUTH.y + FOOD_DY, sizeBefore, CHEW_DIP]
+  if (local === 1) return [HOLD.x, MOUTH.y + FOOD_DY, sizeAfter, CHEW_DIP]
+  return [HOLD.x, HOLD.y + FOOD_DY, sizeAfter, local % 2 === 0 ? CHEW_DIP : 0]
 }
 
 function renderEat(r: Renderer, opts: ActionOpts) {

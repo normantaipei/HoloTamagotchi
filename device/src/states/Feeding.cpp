@@ -16,6 +16,7 @@ constexpr int EAT_X = 85, EAT_Y = 34, EAT_W = 150, EAT_H = 150;
 constexpr int MOUTH_X = EAT_X + EAT_W / 2;             // 嘴中心 x ≈ 160
 constexpr int MOUTH_Y = EAT_Y + EAT_H * 3 / 5;         // 圓嘴 y ≈ 124
 constexpr int HOLD_Y  = MOUTH_Y + 34;                  // 在嘴邊「拿著」的 y ≈ 158
+constexpr int FOOD_DY = -(EAT_H * 20 / 100);           // 食物整體上移 20%（以 150px 角色高為基準 = 30px）
 constexpr int FOOD_SIZE = 95;                          // 食物起始邊長
 
 // 動畫節奏：食物分 BITES 口咬掉，每口先咬下、再咀嚼。
@@ -90,9 +91,9 @@ void Feeding::renderEat() {
     int sizeAfter  = FOOD_SIZE * (BITES - i - 1) / BITES;
     int sizeBefore = FOOD_SIZE * (BITES - i) / BITES;
     int fy, size;
-    if (local == 0)      { fy = MOUTH_Y; size = sizeBefore; }   // 張口咬下（還沒缺）
-    else if (local == 1) { fy = MOUTH_Y; size = sizeAfter;  }   // 咬掉一塊
-    else                 { fy = HOLD_Y;  size = sizeAfter;  }   // 咀嚼：回嘴邊拿著
+    if (local == 0)      { fy = MOUTH_Y + FOOD_DY; size = sizeBefore; }   // 張口咬下（還沒缺）
+    else if (local == 1) { fy = MOUTH_Y + FOOD_DY; size = sizeAfter;  }   // 咬掉一塊
+    else                 { fy = HOLD_Y  + FOOD_DY; size = sizeAfter;  }   // 咀嚼：回嘴邊拿著
 
     a.draw("bg_room", 0, 0);
     a.draw("eat", EAT_X, EAT_Y, EAT_W, EAT_H);       // 角色（嚼食）
