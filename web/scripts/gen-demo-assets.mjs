@@ -17,6 +17,13 @@ import sharp from 'sharp'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
+// ── 可選環境設定（給「向下兼容」測試包用）──────────────────────────────
+//   OUT_DIR  輸出資料夾（預設 ../demo-assets）；MAX_DIM 把長邊壓到 N px（等比，測縮放用）；
+//   NO_WIPE  不清空輸出資料夾（保留既有檔）；NO_JSON 不另外吐 holo-art-demo.json。
+//   例：OUT_DIR=demo-assets/test-128 MAX_DIM=128 NO_WIPE=1 node scripts/gen-demo-assets.mjs
+const ENV = process.env
+const MAX_DIM = ENV.MAX_DIM ? Number(ENV.MAX_DIM) : 0
+
 // 各 sprite 的原生輸出尺寸（與 data/manifest.ts 對齊）：
 //   背景 320×240、食物 95×95、其餘（角色/蛋/結局/情緒）150×150。
 function sizeOf(key) {
@@ -383,14 +390,23 @@ async function svgToPng(svg, w, h) {
 }
 
 const f = frames()
-const outDir = join(__dirname, '..', 'demo-assets')
-rmSync(outDir, { recursive: true, force: true })
+const outDir = ENV.OUT_DIR
+  ? (ENV.OUT_DIR.startsWith('/') ? ENV.OUT_DIR : join(__dirname, '..', ENV.OUT_DIR))
+  : join(__dirname, '..', 'demo-assets')
+if (!ENV.NO_WIPE) rmSync(outDir, { recursive: true, force: true })
 mkdirSync(outDir, { recursive: true })
+
+// 把原生尺寸等比壓進 MAX_DIM 的方框（長邊 = MAX_DIM）；MAX_DIM=0 表不縮。
+const capped = (w, h) => {
+  if (!MAX_DIM || (w <= MAX_DIM && h <= MAX_DIM)) return [w, h]
+  const s = MAX_DIM / Math.max(w, h)
+  return [Math.round(w * s), Math.round(h * s)]
+}
 
 const json = {}
 let nFrames = 0
 for (const [key, svgs] of Object.entries(f)) {
-  const [w, h] = sizeOf(key)
+  const [w, h] = capped(...sizeOf(key))
   json[key] = []
   for (let i = 0; i < svgs.length; i++) {
     const name = `${key}_${String(i).padStart(2, '0')}.png`
@@ -401,8 +417,10 @@ for (const [key, svgs] of Object.entries(f)) {
   }
 }
 
-const jsonPath = join(__dirname, '..', 'holo-art-demo.json')
-writeFileSync(jsonPath, JSON.stringify(json))
+console.log(`✅ ${Object.keys(json).length} 個 key、${nFrames} 張 PNG → ${outDir}${MAX_DIM ? `（長邊壓到 ${MAX_DIM}px）` : ''}`)
 
-console.log(`✅ ${Object.keys(json).length} 個 key、${nFrames} 張 PNG → ${outDir}`)
-console.log(`   一鍵載入檔 → ${jsonPath}（${(JSON.stringify(json).length / 1024).toFixed(0)}KB）`)
+if (!ENV.NO_JSON) {
+  const jsonPath = join(__dirname, '..', 'holo-art-demo.json')
+  writeFileSync(jsonPath, JSON.stringify(json))
+  console.log(`   一鍵載入檔 → ${jsonPath}（${(JSON.stringify(json).length / 1024).toFixed(0)}KB）`)
+}
