@@ -99,13 +99,19 @@ docker compose up -d --build   # 更新原始碼後重建
 
 ## 對應裝置端素材
 
-格子的命名、建議資料夾與尺寸，完全對齊 `device/assets/characters/marine/`：
-- `backgrounds/`：`bg_room` `bg_game`（320×240）
-- `anim/`：`egg` `idle` `yawn` `cheer` `pet` `eat` `sleep`
-- `portraits/`：`end_*`（140×150）、`emo_success` / `emo_fail`（90×100）
-- `food/`：`food_0`~`food_4`（50×50）
+格子的命名、建議資料夾與尺寸，完全對齊 `device/data/marine/manifest.txt`：
+- `backgrounds/`：`bg_room`（320×240）
+- `anim/`：`egg` `idle` `yawn` `cheer` `pet` `eat` `sleep`（皆 150×150）
+- `portraits/`：`end_*`、`emo_success` / `emo_fail`（皆 150×150）
+- `food/`：`food_0`~`food_4`（95×95）
 
-驗收滿意後，把圖放進裝置端對應資料夾、在 `character.py` 的 `IMAGES` 補上路徑即可（流程見 `device/assets/README.md`）。
+**檔案規格**（`device/tools/build_fs_assets.py` 轉檔規則）：
+- **PNG 去背**。轉檔時 `alpha < 128` 會變成透明色鍵（0xF81F 洋紅），`alpha ≥ 128` 一律不透明——**沒有半透明**，也請避免在圖裡用純洋紅 `#FF00FF`。
+- **不縮放**：裝置端貼圖照原尺寸畫，上傳尺寸＝上機顯示尺寸。
+- **多幀**：同一 key 交多張即可（`idle_0.png`、`idle_1.png`…），裝置照 `manifest.txt` 的幀數輪播。
+
+驗收滿意後，把 PNG 依 `<key>_NN.png` 命名放進 `web/demo-assets/`，再跑
+`python3 device/tools/build_fs_assets.py` 轉成 RGB565 素材、`pio run -t buildfs -t uploadfs` 燒進裝置的 LittleFS 分區即可（不必重編韌體）。
 
 ## 備註
 - 純前端、無後端：圖片只存在瀏覽器（`localStorage`），重整不會掉，也**不會上傳到任何伺服器**。

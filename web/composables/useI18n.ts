@@ -73,7 +73,7 @@ const messages: Record<Locale, Dict> = {
 
     // SimulatorModal.vue
     'sim.title': '模擬器 · 裝置實機播放',
-    'sim.sub': 'M5Stack Fire 320×240 · 與真機相同的繪圖邏輯',
+    'sim.sub': 'M5Stack Fire 320×240 · 素材規格：PNG 去背、不縮放（上傳尺寸＝上機尺寸）、半透明無效（alpha ≥ 50% 視為不透明，其餘全透明）',
     'sim.close': '關閉',
     'sim.prevFrame': '上一幀',
     'sim.nextFrame': '下一幀',
@@ -166,15 +166,15 @@ const messages: Record<Locale, Dict> = {
     'action.result': '摸頭結算',
 
     // 動作說明（ACTIONS note）
-    'actionNote.egg': '開機 / 重置：蛋隨進度放大（24 幀 ≈ 1.2s）',
-    'actionNote.idle': '主畫面待機。多幀素材會依「多幀速度」輪播',
-    'actionNote.yawn': '疲勞高時隨機觸發（24 幀）後回待機',
-    'actionNote.cheer': '隨機觸發（60 幀）+ 對話泡泡，後回待機',
-    'actionNote.eat': '一口一口咬（4 口 × 9 幀 + 6 收尾 ≈ 2.1s）。可換甜點',
-    'actionNote.sleep': '2 幀呼吸輪播（每 10 幀換 + 上下 2px）',
-    'actionNote.pet': '時間內摸滿親密度條＝成功，沒滿＝失敗。自動示範：手左右擺、開心 + 愛心',
-    'actionNote.ending': '4 種結局圖。可切換分支',
-    'actionNote.result': '摸頭結算情緒圖（成功 / 失敗）。可切換',
+    'actionNote.egg': '素材 egg 150×150 · 黑底全屏，不用背景圖。放大是程式做的（90→150px，24 幀 ≈ 1.2s），圖請直接畫滿 150×150 的最終大小',
+    'actionNote.idle': '素材 idle 150×150 + 背景 bg_room 320×240 · 最常出現的門面，建議 2~3 幀輪播（idle_0、idle_1…），切換速度＝下方「多幀速度」',
+    'actionNote.yawn': '素材 yawn 150×150（＋背景 bg_room）· 疲勞高時隨機播 24 幀（真機 ~14fps ≈ 1.7s）後接回 idle，起訖姿勢請對得上待機',
+    'actionNote.cheer': '素材 cheer 150×150（＋背景 bg_room）· 隨機播 60 幀後回待機。對話泡泡是程式畫在角色上方的，別畫進圖裡',
+    'actionNote.eat': '素材 eat 150×150 + 甜點 food_0~4 各 95×95（＋背景 bg_room）· 甜點的縮小與移動都是程式做的（4 口 × 9 幀 + 6 收尾，真機 ≈ 3s），請畫完整一份、不用畫缺角；角色嘴巴請落在畫布高度約 60% 處',
+    'actionNote.sleep': '素材 sleep 150×150 · 深藍底 #06141E 全屏，不用背景圖。2 幀輪播呼吸（每 10 幀換 + 上下 2px），請交 sleep_0 / sleep_1 兩張',
+    'actionNote.pet': '素材 pet 150×150 + idle（＋背景 bg_room）· pet 是被摸到時的開心表情，沒摸時顯示 idle。手、愛心、親密度條、上方時間條都是程式畫的，別畫進圖裡',
+    'actionNote.ending': '素材 end_good / end_normal / end_bad / end_runaway 各 150×150 · 黑底全屏、置中偏上（y 36~186），標題與結算文字由程式疊在上下方',
+    'actionNote.result': '素材 emo_success / emo_fail 各 150×150 · 摸頭結算畫面，黑底全屏、置中偏上（y 36~186），標題與次數文字由程式疊上',
   },
 
   en: {
@@ -231,7 +231,7 @@ const messages: Record<Locale, Dict> = {
 
     // SimulatorModal.vue
     'sim.title': 'Simulator · On-device playback',
-    'sim.sub': 'M5Stack Fire 320×240 · Same drawing logic as the device',
+    'sim.sub': 'M5Stack Fire 320×240 · Asset spec: transparent PNG, no scaling (upload size = on-device size), no partial alpha (alpha ≥ 50% is opaque, the rest fully transparent)',
     'sim.close': 'Close',
     'sim.prevFrame': 'Prev frame',
     'sim.nextFrame': 'Next frame',
@@ -324,15 +324,15 @@ const messages: Record<Locale, Dict> = {
     'action.result': 'Result',
 
     // action notes (ACTIONS note)
-    'actionNote.egg': 'Boot / reset: the egg scales up with progress (24 frames ≈ 1.2s)',
-    'actionNote.idle': 'Main idle screen. Multi-frame assets loop at the “frame hold” rate',
-    'actionNote.yawn': 'Random when tired (24 frames), then back to idle',
-    'actionNote.cheer': 'Random (60 frames) + speech bubble, then back to idle',
-    'actionNote.eat': 'Bite by bite (4×9 frames + 6 tail ≈ 2.1s). Swappable dessert',
-    'actionNote.sleep': '2-frame breathing loop (swap every 10 frames, ±2px)',
-    'actionNote.pet': 'Fill the affection bar in time = success, otherwise fail. Auto demo: hand sways, happy + hearts',
-    'actionNote.ending': '4 ending portraits. Switch branch',
-    'actionNote.result': 'Petting result emotion (success / fail). Switchable',
+    'actionNote.egg': 'Asset: egg 150×150 · Full black screen, no background art. The scale-up is code (90→150px, 24 frames ≈ 1.2s) — draw the egg at its final 150×150 size',
+    'actionNote.idle': 'Assets: idle 150×150 + background bg_room 320×240 · The most-seen shot; 2–3 looping frames recommended (idle_0, idle_1…), cycling at the “frame hold” rate below',
+    'actionNote.yawn': 'Asset: yawn 150×150 (+ bg_room) · Random when tired, 24 frames (~14fps on device ≈ 1.7s), then cuts back to idle — match the idle pose at both ends',
+    'actionNote.cheer': 'Asset: cheer 150×150 (+ bg_room) · Random, 60 frames, then back to idle. The speech bubble is drawn by code above the character — keep it out of the art',
+    'actionNote.eat': 'Assets: eat 150×150 + desserts food_0–4 at 95×95 each (+ bg_room) · Shrinking and moving the dessert is code (4 bites × 9 frames + 6 tail, ≈ 3s on device) — draw one whole dessert, no bite marks; put the mouth at ~60% of the canvas height',
+    'actionNote.sleep': 'Asset: sleep 150×150 · Full navy #06141E screen, no background art. 2-frame breathing loop (swap every 10 frames, ±2px) — deliver sleep_0 / sleep_1',
+    'actionNote.pet': 'Assets: pet 150×150 + idle (+ bg_room) · pet is the happy reaction while being petted, idle shows in between. Hand, hearts, affection bar and timer bar are all drawn by code — keep them out of the art',
+    'actionNote.ending': 'Assets: end_good / end_normal / end_bad / end_runaway, 150×150 each · Full black screen, placed high-center (y 36–186); title and stats text are overlaid by code above and below',
+    'actionNote.result': 'Assets: emo_success / emo_fail, 150×150 each · Petting result screen, full black, placed high-center (y 36–186); title and counts are overlaid by code',
   },
 }
 
